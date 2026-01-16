@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary"><i class="bi bi-graph-up-arrow me-2"></i>Analitik Bisnis</h2>
+            <p class="text-muted">Pantau pertumbuhan omzet dan produk terlaris Anda.</p>
+        </div>
+        
+        <div class="btn-group shadow-sm bg-white rounded-pill p-1" role="group">
+            <a href="{{ url_for('web.analytics', period='daily') }}" 
+               class="btn btn-sm rounded-pill px-3 fw-bold {{ 'btn-primary' if current_period == 'daily' else 'btn-light text-muted' }}">
+               Hari Ini
+            </a>
+            <a href="{{ url_for('web.analytics', period='weekly') }}" 
+               class="btn btn-sm rounded-pill px-3 fw-bold {{ 'btn-primary' if current_period == 'weekly' else 'btn-light text-muted' }}">
+               Mingguan
+            </a>
+            <a href="{{ url_for('web.analytics', period='monthly') }}" 
+               class="btn btn-sm rounded-pill px-3 fw-bold {{ 'btn-primary' if current_period == 'monthly' else 'btn-light text-muted' }}">
+               Bulanan
+            </a>
+            <a href="{{ url_for('web.analytics', period='yearly') }}" 
+               class="btn btn-sm rounded-pill px-3 fw-bold {{ 'btn-primary' if current_period == 'yearly' else 'btn-light text-muted' }}">
+               Tahunan
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">{{ chart_label }}</h5>
+                        <div class="text-muted small">
+                            <i class="bi bi-calendar3 me-1"></i> Periode: <strong>{{ date_range_info }}</strong>
+                        </div>
+                    </div>
+                    <span class="badge bg-success bg-opacity-10 text-success py-2 px-3 rounded-pill">
+                        <i class="bi bi-cash-coin me-1"></i> Omzet
+                    </span>
+                </div>
+                <div class="card-body p-4">
+                    <div style="height: 300px;">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-muted mb-0">Top 5 Produk Terlaris</h5>
+                </div>
+                <div class="card-body p-4 d-flex align-items-center justify-content-center">
+                    <div style="height: 250px; width: 100%;">
+                        <canvas id="topProductChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // --- GRAFIK 1: Penjualan ---
+    const ctx1 = document.getElementById('salesChart').getContext('2d');
+    const dateLabels = JSON.parse('{{ dates | safe }}');
+    const revenueData = JSON.parse('{{ revenues | safe }}');
+
+    new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: dateLabels,
+            datasets: [{
+                label: 'Pendapatan (Rp)',
+                data: revenueData,
+                borderColor: '#2a5298',
+                backgroundColor: (context) => {
+                    const ctx = context.chart.ctx;
+                    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                    gradient.addColorStop(0, 'rgba(42, 82, 152, 0.4)');
+                    gradient.addColorStop(1, 'rgba(42, 82, 152, 0.0)');
+                    return gradient;
+                },
+                borderWidth: 3,
+                tension: 0.4, 
+                fill: true,
+                pointRadius: 4,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#2a5298'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: { 
+                    beginAtZero: true, 
+                    grid: { borderDash: [5, 5] },
+                    ticks: { callback: function(value) { return 'Rp ' + (value / 1000).toLocaleString('id-ID') + 'k'; } }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // --- GRAFIK 2: Produk Terlaris ---
+    const ctx2 = document.getElementById('topProductChart').getContext('2d');
+    const productNames = JSON.parse('{{ top_names | safe }}');
+    const productQtys = JSON.parse('{{ top_qtys | safe }}');
+
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: productNames,
+            datasets: [{
+                data: productQtys,
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+{% endblock %}

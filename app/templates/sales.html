@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="mb-4">
+        <a href="/" class="text-decoration-none text-muted fw-bold">
+            <i class="bi bi-arrow-left me-2"></i> Kembali ke Menu Utama
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow rounded-4 border-0">
+                <div class="card-header bg-primary text-white p-4 rounded-top-4">
+                    <h4 class="fw-bold mb-0"><i class="bi bi-cart-check me-2"></i> Form Penjualan (Kasir)</h4>
+                    <p class="mb-0 opacity-75">Input barang keluar untuk customer (Outbound)</p>
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ url_for('sales.process_sales_web') }}" method="POST">
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">NAMA CUSTOMER</label>
+                                <input type="text" class="form-control" name="customer_name" placeholder="Umum / Nama Pembeli" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">NO. INVOICE / NOTA</label>
+                                <input type="text" class="form-control" name="reference" placeholder="Otomatis / Manual" required>
+                            </div>
+                        </div>
+
+                        <hr class="text-muted opacity-25">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-muted">PILIH PRODUK</label>
+                            <select class="form-select form-select-lg" name="product_id" id="productSelect" required onchange="updatePrice()">
+                                <option value="" selected disabled>-- Pilih Barang --</option>
+                                {% for p in products %}
+                                    <option value="{{ p.id }}" data-price="{{ p.price }}" data-stock="{{ p.stock_quantity }}">
+                                        {{ p.sku }} - {{ p.name }} (Stok: {{ p.stock_quantity }} | Rp {{ "{:,.0f}".format(p.price) }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">JUMLAH (QTY)</label>
+                                <input type="number" class="form-control form-control-lg" name="quantity" id="qtyInput" placeholder="0" min="1" required oninput="updateTotal()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">ESTIMASI TOTAL HARGA</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-light text-muted">Rp</span>
+                                    <input type="text" class="form-control fw-bold text-primary" id="totalDisplay" value="0" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow-sm">
+                            <i class="bi bi-cash-coin me-2"></i> Proses Transaksi
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updatePrice() {
+        updateTotal();
+    }
+
+    function updateTotal() {
+        const select = document.getElementById('productSelect');
+        const qty = document.getElementById('qtyInput').value;
+        const totalDisplay = document.getElementById('totalDisplay');
+        
+        // Ambil harga dari opsi yang dipilih
+        const selectedOption = select.options[select.selectedIndex];
+        const price = selectedOption.getAttribute('data-price');
+        
+        if (price && qty) {
+            const total = price * qty;
+            // Format Rupiah
+            totalDisplay.value = new Intl.NumberFormat('id-ID').format(total);
+        } else {
+            totalDisplay.value = "0";
+        }
+    }
+</script>
+{% endblock %}

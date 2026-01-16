@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="id">
+    <!DOCTYPE html>
+<html>
+<head><title>Struk</title></head>
+<body onload="window.print()">
+    <h2>BUKTI TRANSAKSI</h2>
+    <p>ID: #{{ t.id }}</p>
+    <p>Barang: {{ t.product.name }}</p>
+    <p>Total: Rp {{ "{:,.0f}".format(t.total_amount) }}</p>
+    <a href="/sales/web/form">Kembali</a>
+</body>
+</html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struk Penjualan #{{ t.id }}</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace; /* Font ala struk */
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .receipt-container {
+            max-width: 350px; /* Ukuran lebar struk standar */
+            background: #fff;
+            margin: 0 auto;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .header { text-align: center; margin-bottom: 20px; border-bottom: 1px dashed #000; padding-bottom: 10px; }
+        .header h2 { margin: 0; font-size: 18px; text-transform: uppercase; }
+        .header p { margin: 2px 0; font-size: 12px; }
+        
+        .details { font-size: 12px; margin-bottom: 15px; }
+        .details table { width: 100%; }
+        .details td { padding: 2px 0; }
+        
+        .items { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
+        .items th { text-align: left; border-bottom: 1px solid #000; padding: 5px 0; }
+        .items td { padding: 5px 0; border-bottom: 1px dashed #ddd; }
+        
+        .total-section { border-top: 2px solid #000; padding-top: 10px; font-size: 14px; font-weight: bold; }
+        
+        .footer { text-align: center; margin-top: 20px; font-size: 10px; border-top: 1px dashed #000; padding-top: 10px; }
+        
+        /* Tombol tidak ikut terprint */
+        .actions { margin-top: 20px; text-align: center; }
+        .btn { 
+            padding: 10px 20px; text-decoration: none; color: white; border-radius: 5px; font-family: sans-serif; font-size: 14px; cursor: pointer; border: none; 
+        }
+        .btn-print { background-color: #2a5298; }
+        .btn-back { background-color: #666; }
+
+        /* PENTING: Mengatur tampilan saat diprint */
+        @media print {
+            body { background-color: #fff; padding: 0; margin: 0; }
+            .receipt-container { box-shadow: none; padding: 0; width: 100%; max-width: 100%; }
+            .actions { display: none; } /* Sembunyikan tombol saat print */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-container">
+        <div class="header">
+            <h2>GUDANG PRO</h2>
+            <p>Jl. Teknologi No. 12, Jakarta</p>
+            <p>Telp: 021-555-9999</p>
+        </div>
+
+        <div class="details">
+            <table>
+                <tr>
+                    <td>Tgl:</td>
+                    <td style="text-align: right;">{{ t.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                </tr>
+                <tr>
+                    <td>No. Nota:</td>
+                    <td style="text-align: right;">#{{ t.reference or t.id }}</td>
+                </tr>
+                <tr>
+                    <td>Customer:</td>
+                    <td style="text-align: right;">{{ t.supplier }}</td>
+                </tr>
+                <tr>
+                    <td>Kasir:</td>
+                    <td style="text-align: right;">{{ session.get('username', 'Admin') }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <table class="items">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th style="text-align: right;">Qty</th>
+                    <th style="text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3" style="font-weight: bold;">{{ t.product.name }}</td>
+                </tr>
+                <tr>
+                    <td>@ {{ "{:,.0f}".format(t.product.price) }}</td>
+                    <td style="text-align: right;">x {{ t.quantity }}</td>
+                    <td style="text-align: right;">{{ "{:,.0f}".format(t.total_amount) }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total-section">
+            <table style="width: 100%;">
+                <tr>
+                    <td>TOTAL BAYAR</td>
+                    <td style="text-align: right;">Rp {{ "{:,.0f}".format(t.total_amount) }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>Terima Kasih atas kunjungan Anda.</p>
+            <p>Barang yang dibeli tidak dapat ditukar.</p>
+        </div>
+
+        <div class="actions">
+            <button onclick="window.print()" class="btn btn-print">🖨️ Cetak</button>
+            <br><br>
+            <a href="{{ url_for('sales.sales_page') }}" class="btn btn-back">⬅️ Kembali ke Kasir</a>
+        </div>
+    </div>
+
+</body>
+</html>

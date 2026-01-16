@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="card p-4 shadow-lg" style="width: 100%; max-width: 400px;">
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="bi bi-person-fill fs-2"></i>
+                </div>
+                <h4 class="fw-bold">Login Admin</h4>
+                <p class="text-muted small">Silakan masuk untuk mengelola gudang</p>
+            </div>
+            
+            <form action="{{ url_for('auth.login_web') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" name="username" placeholder="Masukkan username" required autofocus>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
+                        <input type="password" class="form-control" name="password" placeholder="Masukkan password" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2">Masuk ke Sistem</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

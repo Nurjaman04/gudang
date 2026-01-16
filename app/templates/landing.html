@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if not session.get('user_id') %}
+<div class="text-center py-5 mb-5 rounded-4 text-white" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+    <div class="container py-4">
+        <h1 class="display-4 fw-bold mb-3">Sistem Pergudangan Terpadu</h1>
+        <p class="lead mb-4 opacity-75">Kelola stok, pantau analitik, dan input barang masuk dalam satu sistem.</p>
+        <a href="{{ url_for('auth.login_web') }}" class="btn btn-light btn-lg text-primary fw-bold px-5 shadow-lg">Login Staff / Admin</a>
+    </div>
+</div>
+
+<div class="row g-4" id="features">
+    <div class="col-md-4">
+        <div class="card h-100 p-4 text-center border-0 shadow-sm">
+            <div class="mb-3"><i class="bi bi-box-seam text-primary" style="font-size: 3rem;"></i></div>
+            <h5 class="fw-bold">Stok Real-time</h5>
+            <p class="text-muted small">Cek ketersediaan barang kapan saja.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 p-4 text-center border-0 shadow-sm">
+            <div class="mb-3"><i class="bi bi-truck text-success" style="font-size: 3rem;"></i></div>
+            <h5 class="fw-bold">Inbound Barang</h5>
+            <p class="text-muted small">Pencatatan barang masuk supplier.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 p-4 text-center border-0 shadow-sm">
+            <div class="mb-3"><i class="bi bi-graph-up text-warning" style="font-size: 3rem;"></i></div>
+            <h5 class="fw-bold">Analitik Admin</h5>
+            <p class="text-muted small">Laporan penjualan untuk pemilik.</p>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="container py-4">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">Halo, {{ session.get('username') }}! 👋</h2>
+        <p class="text-muted">Mau melakukan apa hari ini?</p>
+    </div>
+
+    <div class="row justify-content-center g-4">
+        
+        <div class="col-md-4">
+            <div class="card h-100 shadow border-0 overflow-hidden hover-card">
+                <div class="card-body p-4 text-center">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-truck text-success fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">Barang Masuk</h4>
+                    <p class="text-muted small mb-4">Input stok dari supplier.</p>
+                    <a href="{{ url_for('web.receiving_page') }}" class="btn btn-outline-success w-100 rounded-pill fw-bold">
+                        Input Masuk
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow border-0 overflow-hidden hover-card">
+                <div class="card-body p-4 text-center">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-cart-check text-primary fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">Penjualan (Kasir)</h4>
+                    <p class="text-muted small mb-4">Input barang keluar ke customer.</p>
+                    <a href="{{ url_for('sales.sales_page') }}" class="btn btn-primary w-100 rounded-pill fw-bold">
+    Input Penjualan
+</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow border-0 overflow-hidden hover-card">
+                <div class="card-body p-4 text-center">
+                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-graph-up-arrow text-warning fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-2">Laporan & Grafik</h4>
+                    <p class="text-muted small mb-4">Analisa keuntungan & stok.</p>
+                    <a href="{{ url_for('web.dashboard') }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold">
+                        Buka Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+        <div class="col-md-5">
+            <div class="card h-100 shadow border-0 overflow-hidden hover-card">
+                <div class="card-body p-5 text-center">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-4 mb-4">
+                        <i class="bi bi-speedometer2 text-primary display-4"></i>
+                    </div>
+                    <h3 class="fw-bold mb-3">Dashboard Admin</h3>
+                    <p class="text-muted mb-4">Lihat grafik penjualan, total pendapatan, dan laporan transaksi.</p>
+                    <a href="{{ url_for('web.dashboard') }}" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold">
+                        <i class="bi bi-bar-chart-line me-2"></i> Buka Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <div class="text-center mt-5">
+        <a href="{{ url_for('web.inventory') }}" class="text-decoration-none text-muted fw-bold">
+            <i class="bi bi-list-ul me-1"></i> Lihat Semua Stok Barang
+        </a>
+    </div>
+</div>
+
+<style>
+    .hover-card { transition: transform 0.3s ease; }
+    .hover-card:hover { transform: translateY(-10px); }
+</style>
+{% endif %}
+
+{% endblock %}

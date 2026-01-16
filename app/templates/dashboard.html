@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary">Dashboard Overview</h2>
+            <p class="text-muted">Pantau aktivitas toko Anda hari ini.</p>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm">
+                <i class="bi bi-calendar-event me-2 text-primary"></i> <span id="currentDate" class="fw-bold"></span>
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white;">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="bg-white bg-opacity-25 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-wallet2 fs-4"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('web.laporan_final') }}">Lihat Laporan Lengkap</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <h6 class="text-white text-opacity-75 text-uppercase small fw-bold">Pendapatan Hari Ini</h6>
+                    <h2 class="fw-bold mb-0">Rp {{ "{:,.0f}".format(summary.total_revenue) }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 bg-white">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-box-seam fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="text-muted text-uppercase small fw-bold">Terjual Hari Ini</h6>
+                    <h2 class="fw-bold mb-0 text-dark">{{ summary.total_items_sold }} <span class="fs-6 text-muted fw-normal">Unit</span></h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 bg-white">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="bi bi-graph-up-arrow fs-4"></i>
+                        </div>
+                    </div>
+                    <h6 class="text-muted text-uppercase small fw-bold">Rata-rata Transaksi</h6>
+                    <h2 class="fw-bold mb-0 text-dark">Rp {{ "{:,.0f}".format(summary.average_order_value) }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h5 class="fw-bold mb-3"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Aksi Cepat</h5>
+    <div class="row g-3 mb-5">
+        <div class="col-md-3">
+            <a href="{{ url_for('sales.sales_page') }}" class="btn btn-primary w-100 py-3 rounded-4 shadow-sm fw-bold text-start">
+                <i class="bi bi-cart-plus me-2"></i> Kasir Baru
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('web.receiving_page') }}" class="btn btn-success w-100 py-3 rounded-4 shadow-sm fw-bold text-start text-white">
+                <i class="bi bi-arrow-down-square me-2"></i> Barang Masuk
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('web.inventory') }}" class="btn btn-info w-100 py-3 rounded-4 shadow-sm fw-bold text-start text-white">
+                <i class="bi bi-box-seam me-2"></i> Cek Stok
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{{ url_for('web.laporan_final') }}" class="btn btn-dark w-100 py-3 rounded-4 shadow-sm fw-bold text-start">
+                <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white p-3 border-bottom">
+            <h5 class="mb-0 fw-bold">Transaksi Terakhir</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Waktu</th>
+                        <th>Ref</th>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in recent_transactions %}
+                    <tr>
+                        <td class="ps-4 text-muted small">{{ t.created_at.strftime('%H:%M') }}</td>
+                        <td class="fw-bold text-primary small">#{{ t.reference }}</td>
+                        <td>{{ t.product.name }}</td>
+                        <td class="fw-bold">{{ t.quantity }}</td>
+                        <td class="text-success fw-bold">Rp {{ "{:,.0f}".format(t.total_amount) }}</td>
+                        <td>
+                            <span class="badge bg-success bg-opacity-10 text-success">Selesai</span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">Belum ada transaksi hari ini.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Menampilkan tanggal hari ini (Format Indonesia: Senin, 13 Januari 2026)
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateStr = new Date().toLocaleDateString('id-ID', options);
+    document.getElementById('currentDate').innerText = dateStr;
+</script>
+{% endblock %}

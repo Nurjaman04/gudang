@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-primary"><i class="bi bi-box-seam-fill"></i> Data Stok Barang</h2>
+        <p class="text-muted">Kelola persediaan barang gudang Anda di sini.</p>
+    </div>
+    <button class="btn btn-primary btn-lg shadow" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        <i class="bi bi-plus-lg me-2"></i> Tambah Barang
+    </button>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="py-3 ps-4">SKU / Kode</th>
+                    <th class="py-3">Nama Produk</th>
+                    <th class="py-3">Harga Jual</th>
+                    <th class="py-3 text-center">Stok</th>
+                    <th class="py-3 text-center">Status</th>
+                    <th class="py-3 text-end pe-4">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in products %}
+                <tr>
+                    <td class="ps-4 fw-bold text-secondary">{{ p.sku }}</td>
+                    <td>
+                        <div class="fw-bold text-dark">{{ p.name }}</div>
+                        <small class="text-muted">Modal: Rp {{ "{:,.0f}".format(p.cost) }}</small>
+                    </td>
+                    <td>Rp {{ "{:,.0f}".format(p.price) }}</td>
+                    <td class="text-center">
+                        <span class="badge rounded-pill {{ 'bg-danger' if p.stock_quantity <= p.min_stock_threshold else 'bg-primary bg-opacity-10 text-primary' }} fs-6 px-3">
+                            {{ p.stock_quantity }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        {% if p.stock_quantity <= p.min_stock_threshold %}
+                            <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Menipis</span>
+                        {% else %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Aman</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end pe-4">
+                        <button class="btn btn-sm btn-success rounded-circle shadow-sm" 
+                                onclick="openRestockModal('{{ p.id }}', '{{ p.name }}')"
+                                title="Tambah Stok">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">Belum ada data barang.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Tambah Barang Baru</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('inventory.add_product_web') }}" method="POST">
+                <div class="modal-body p-4">
+                    <div class="mb-3"><label class="small fw-bold text-muted">SKU</label><input type="text" class="form-control" name="sku" required></div>
+                    <div class="mb-3"><label class="small fw-bold text-muted">NAMA</label><input type="text" class="form-control" name="name" required></div>
+                    <div class="row g-2 mb-3">
+                        <div class="col"><label class="small fw-bold text-muted">MODAL</label><input type="number" class="form-control" name="cost" required></div>
+                        <div class="col"><label class="small fw-bold text-muted">JUAL</label><input type="number" class="form-control" name="price" required></div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col"><label class="small fw-bold text-muted">STOK AWAL</label><input type="number" class="form-control" name="stock" value="0" required></div>
+                        <div class="col"><label class="small fw-bold text-muted">MIN STOK</label><input type="number" class="form-control" name="min_stock" value="10" required></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill fw-bold">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="restockModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-box-seam me-2"></i>Restock Barang</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <form action="{{ url_for('inventory.restock_product_web') }}" method="POST">
+                <div class="modal-body p-4 text-center">
+                    <input type="hidden" name="product_id" id="restock_product_id">
+                    
+                    <h6 class="text-muted mb-3">Menambah stok untuk:</h6>
+                    <h4 class="fw-bold text-dark mb-4" id="restock_product_name">Nama Produk</h4>
+                    
+                    <div class="form-floating mb-3">
+                        <input type="number" class="form-control fs-4 fw-bold text-center text-success" name="amount" id="restockAmount" placeholder="0" min="1" required>
+                        <label for="restockAmount">Jumlah Masuk (Pcs)</label>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 justify-content-center pt-0">
+                    <button type="submit" class="btn btn-success rounded-pill px-5 fw-bold w-100">
+                        <i class="bi bi-check-lg me-2"></i> Tambah Stok
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openRestockModal(id, name) {
+        // 1. Isi input hidden ID
+        document.getElementById('restock_product_id').value = id;
+        
+        // 2. Tampilkan nama barang di judul modal
+        document.getElementById('restock_product_name').innerText = name;
+        
+        // 3. Buka Modal secara manual via Bootstrap API
+        var myModal = new bootstrap.Modal(document.getElementById('restockModal'));
+        myModal.show();
+    }
+</script>
+{% endblock %}
