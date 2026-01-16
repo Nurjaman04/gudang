@@ -3,4 +3,4 @@ SQLAlchemy
 pandas
 matplotlib
 APScheduler
-serverless-http
+aws-wsgi
