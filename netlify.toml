@@ -1,6 +1,7 @@
 [build]
+  command = "python build.py"
   publish = "app/static"
-  functions = "netlify/functions"
+  functions = "netlify_deploy"
 
 [functions]
   external_node_modules = ["python-dotenv"]
