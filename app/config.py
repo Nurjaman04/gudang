@@ -8,10 +8,14 @@ import os
 class Config:
     SECRET_KEY = 'rahasia-pergudangan'
     
-    # PERBAIKAN DI SINI:
-    # Kita gunakan path relative sederhana. 
-    # 'sqlite:///warehouse.db' artinya: Buat file database di folder tempat kita menjalankan aplikasi (folder wms).
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///warehouse.db'
+    # Konfigurasi Database
+    # Cek apakah berjalan di lingkungan Lambda/Netlify (Read-Only)
+    if os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
+        # Gunakan /tmp yang writable di lingkungan serverless
+        SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/warehouse.db'
+    else:
+        # Gunakan path lokal untuk development
+        SQLALCHEMY_DATABASE_URI = 'sqlite:///warehouse.db'
     
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
