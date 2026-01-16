@@ -1,7 +1,7 @@
 [build]
   command = "pip install -r requirements.txt"
   publish = "app/static"
-  functions = "netlify/functions"
+  functions = "functions"
 
 [functions]
   external_node_modules = ["python-dotenv"]
