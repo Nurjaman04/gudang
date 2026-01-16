@@ -1,0 +1,13 @@
+[build]
+  command = "pip install -r requirements.txt"
+  publish = "app/static"
+  functions = "netlify/functions"
+
+[functions]
+  external_node_modules = ["python-dotenv"]
+
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/app"
+  status = 200
+  force = true
