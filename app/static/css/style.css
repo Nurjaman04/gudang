@@ -1,0 +1,302 @@
+:root {
+    /* Light Luxury Palette: Warm White, Gold, Slate */
+    --primary-color: #4a4a4a;
+    /* Dark Grey (Not Black) */
+    --secondary-color: #6c757d;
+    /* Slate Grey */
+    --accent-color: #b78628;
+    /* Antique Gold */
+    --accent-hover: #d4af37;
+    /* Brighter Gold */
+
+    --success-color: #2e7d32;
+    /* Forest Green */
+    --danger-color: #c62828;
+    /* Deep Red */
+    --warning-color: #ef6c00;
+    /* Burnt Orange */
+
+    --dark-bg: #ffffff;
+    /* White Sidebar */
+    --light-bg: #f9f9f9;
+    /* Off-white Body */
+    --text-color: #333333;
+    /* Dark Grey Text */
+    --text-muted: #666666;
+
+    --sidebar-width: 260px;
+    --card-radius: 16px;
+
+    /* Crystal Glass Effect (Light) */
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.9);
+    --shadow-soft: 0 10px 30px rgba(183, 134, 40, 0.1);
+    /* Golden Shadow */
+}
+
+body {
+    background: url('../img/warehouse-bg.png') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Light Overlay */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Warm Light Overlay to mute the background image */
+    background: linear-gradient(135deg, rgba(245, 245, 245, 0.9), rgba(255, 250, 240, 0.85));
+    z-index: -1;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.85);
+    /* Milky Glass */
+    backdrop-filter: blur(15px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+    border-right: 1px solid rgba(183, 134, 40, 0.2);
+    /* Gold Border */
+    box-shadow: 5px 0 20px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header {
+    padding: 30px 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.brand-text {
+    font-weight: 700;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+    color: var(--accent-color);
+    text-transform: uppercase;
+}
+
+.sidebar-menu {
+    padding: 20px 0;
+    list-style: none;
+    margin: 0;
+}
+
+.menu-item {
+    margin-bottom: 5px;
+}
+
+.menu-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 25px;
+    color: var(--secondary-color);
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 4px solid transparent;
+    font-weight: 500;
+}
+
+.menu-link:hover,
+.menu-link.active {
+    background: linear-gradient(90deg, rgba(183, 134, 40, 0.1), transparent);
+    color: var(--accent-color);
+    border-left-color: var(--accent-color);
+}
+
+.menu-link i {
+    margin-right: 15px;
+    font-size: 1.1rem;
+    width: 25px;
+    text-align: center;
+}
+
+.menu-category {
+    padding: 20px 25px 10px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: #999;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* Main Content */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 30px;
+    min-height: 100vh;
+    transition: all 0.3s ease;
+}
+
+/* Header/Top Bar */
+.top-header {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    padding: 15px 30px;
+    border-radius: var(--card-radius);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+    box-shadow: var(--shadow-soft);
+}
+
+.search-bar {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 30px;
+    padding: 8px 20px;
+    width: 300px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.search-bar:focus-within {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(183, 134, 40, 0.2);
+}
+
+.search-bar input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    outline: none;
+    margin-left: 10px;
+    color: var(--text-color);
+}
+
+/* Cards */
+.card {
+    background: rgba(255, 255, 255, 0.85);
+    /* Light Glass */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 1);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    color: var(--text-color);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(183, 134, 40, 0.15);
+    border-color: rgba(183, 134, 40, 0.3);
+}
+
+.card-header {
+    background: rgba(255, 255, 255, 0.6);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 20px 25px;
+    font-weight: 700;
+    color: var(--primary-color);
+    letter-spacing: 0.5px;
+}
+
+/* Adjust Text Colors for Light Theme */
+.text-muted {
+    color: #888 !important;
+}
+
+.bg-light {
+    background-color: #fff !important;
+    border: 1px solid #f0f0f0;
+}
+
+/* Custom Buttons */
+.btn-primary {
+    background: var(--accent-color);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(183, 134, 40, 0.3);
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(183, 134, 40, 0.4);
+}
+
+.btn-light {
+    background: #fff;
+    color: var(--text-color);
+    border: 1px solid #e0e0e0;
+}
+
+.btn-light:hover {
+    background: #f8f9fa;
+    border-color: #ccc;
+}
+
+/* Alerts */
+.alert {
+    background: #fff;
+    border: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.alert-danger {
+    border-left: 4px solid var(--danger-color);
+    color: var(--danger-color);
+}
+
+.alert-success {
+    border-left: 4px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.alert-warning {
+    border-left: 4px solid var(--warning-color);
+    color: var(--warning-color);
+}
+
+/* Quick Text Overrides for specific elements that might assume dark bg */
+.text-white {
+    color: #fff !important;
+}
+
+/* Mobile Toggle */
+.mobile-toggle {
+    display: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    margin-right: 15px;
+    color: var(--primary-color);
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .mobile-toggle {
+        display: block;
+    }
+}

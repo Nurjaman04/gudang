@@ -12,7 +12,53 @@ web_bp = Blueprint('web', __name__)
 # --- 1. HALAMAN DEPAN ---
 @web_bp.route('/')
 def index():
-    return render_template('landing.html')
+    # 1. Simulasi Data Penjualan Cabang (Multi-Branch) - Tetap ada
+    branches_data = {
+        'names': ['Jakarta Pusat', 'Surabaya Timur', 'Bandung Barat', 'Medan Kota', 'Semarang'],
+        'sales': [45000000, 32000000, 28000000, 15000000, 21000000],
+        'colors': ['#2c3e50', '#c5a059', '#27ae60', '#c0392b', '#7f8c8d']
+    }
+
+    # 2. Data Real: Top 5 Produk Terlaris (Persentase)
+    top_products_query = db.session.query(
+        Product.name, func.sum(Transaction.quantity)
+    ).join(Transaction).filter(
+        Transaction.transaction_type == 'OUT'
+    ).group_by(Product.name).order_by(func.sum(Transaction.quantity).desc()).limit(5).all()
+
+    top_names = [p[0] for p in top_products_query]
+    top_qtys = [p[1] for p in top_products_query]
+
+    # 3. Data Real: Grafik Pendapatan 7 Hari Terakhir
+    today = datetime.now()
+    seven_days_ago = today - timedelta(days=6)
+    
+    transactions = Transaction.query.filter(
+        Transaction.transaction_type == 'OUT',
+        Transaction.created_at >= seven_days_ago
+    ).all()
+
+    # Agregasi per hari
+    if not transactions:
+        chart_dates = []
+        chart_values = []
+    else:
+        data = [{'created_at': t.created_at, 'total': t.total_amount} for t in transactions]
+        df = pd.DataFrame(data)
+        df['created_at'] = pd.to_datetime(df['created_at'])
+        df.set_index('created_at', inplace=True)
+        
+        # Resample Harian
+        grouped = df.resample('D')['total'].sum().fillna(0)
+        chart_dates = grouped.index.strftime('%d %b').tolist()
+        chart_values = grouped.values.tolist()
+    
+    return render_template('landing.html', 
+                           branches=branches_data,
+                           top_names=top_names,
+                           top_qtys=top_qtys,
+                           trend_dates=chart_dates,
+                           trend_values=chart_values)
 
 # --- 2. DASHBOARD (DATA HARI INI) ---
 @web_bp.route('/dashboard')
@@ -209,6 +255,66 @@ def analytics():
     top_names = [p[0] for p in top_products_query]
     top_qtys = [p[1] for p in top_products_query]
 
+    # --- ADVANCED ANALYTICS: ABC ANALYSIS & INVENTORY HEALTH ---
+    
+    # 1. ABC Analysis (80/15/5 Rule based on Revenue)
+    # Ambil semua produk dan total revenue-nya
+    product_revenue = db.session.query(
+        Product.name, func.sum(Transaction.total_amount).label('revenue')
+    ).join(Transaction).filter(
+        Transaction.transaction_type == 'OUT'
+    ).group_by(Product.name).order_by(func.sum(Transaction.total_amount).desc()).all()
+
+    total_revenue_all = sum([p.revenue for p in product_revenue]) or 0
+    cumulative_revenue = 0
+    abc_data = {'A': 0, 'B': 0, 'C': 0}
+    
+    # Kategori ABC: A (akumulasi s.d 80%), B (s.d 95%), C (sisanya)
+    for p in product_revenue:
+        cumulative_revenue += p.revenue
+        percentage = (cumulative_revenue / total_revenue_all) * 100
+        if percentage <= 80:
+            abc_data['A'] += 1
+        elif percentage <= 95:
+            abc_data['B'] += 1
+        else:
+            abc_data['C'] += 1
+
+    # 2. Dead Stock (Barang tidak terjual > 30 hari)
+    thirty_days_ago = now - timedelta(days=30)
+    
+    # Subquery: ID produk yang ada transaksi OUT dalam 30 hari terakhir
+    active_product_ids = db.session.query(Transaction.product_id).filter(
+        Transaction.transaction_type == 'OUT',
+        Transaction.created_at >= thirty_days_ago
+    ).distinct()
+    
+    # Produk yang TIDAK ada di list active_product_ids
+    dead_stock_products = Product.query.filter(Product.id.notin_(active_product_ids)).all()
+    dead_stock_count = len(dead_stock_products)
+
+    # 3. Critical Low Stock (Stock < Min Threshold)
+    low_stock_products = Product.query.filter(Product.stock_quantity <= Product.min_stock_threshold).all()
+    low_stock_count = len(low_stock_products)
+    
+    # 4. Actionable Recommendations (Sample)
+    recommendations = []
+    if low_stock_count > 0:
+        recommendations.append({
+            'type': 'danger', 
+            'msg': f'{low_stock_count} Produk berada di bawah stok minimum. Segera lakukan restock.'
+        })
+    if dead_stock_count > 0:
+        recommendations.append({
+            'type': 'warning', 
+            'msg': f'{dead_stock_count} Produk termasuk Dead Stock (tidak laku >30 hari). Pertimbangkan diskon/obral.'
+        })
+    if not product_revenue and total_revenue_all == 0:
+         recommendations.append({
+            'type': 'info', 
+            'msg': 'Belum ada data penjualan yang cukup untuk analisis ABC.'
+        })
+
     return render_template('analytics.html', 
                            dates=json.dumps(chart_dates), 
                            revenues=json.dumps(chart_values),
@@ -216,4 +322,8 @@ def analytics():
                            top_qtys=json.dumps(top_qtys),
                            current_period=period, 
                            chart_label=chart_label,
-                           date_range_info=date_range_info)
+                           date_range_info=date_range_info,
+                           abc_data=abc_data,
+                           dead_stock_count=dead_stock_count,
+                           low_stock_count=low_stock_count,
+                           recommendations=recommendations)

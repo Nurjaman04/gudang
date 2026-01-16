@@ -2,11 +2,13 @@
 
 {% block content %}
 {% if not session.get('user_id') %}
-<div class="text-center py-5 mb-5 rounded-4 text-white" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+<div class="text-center py-5 mb-5 rounded-4 text-white"
+    style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
     <div class="container py-4">
         <h1 class="display-4 fw-bold mb-3">Sistem Pergudangan Terpadu</h1>
         <p class="lead mb-4 opacity-75">Kelola stok, pantau analitik, dan input barang masuk dalam satu sistem.</p>
-        <a href="{{ url_for('auth.login_web') }}" class="btn btn-light btn-lg text-primary fw-bold px-5 shadow-lg">Login Staff / Admin</a>
+        <a href="{{ url_for('auth.login_web') }}" class="btn btn-light btn-lg text-primary fw-bold px-5 shadow-lg">Login
+            Staff / Admin</a>
     </div>
 </div>
 
@@ -42,81 +44,209 @@
     </div>
 
     <div class="row justify-content-center g-4">
-        
-        <div class="col-md-4">
-            <div class="card h-100 shadow border-0 overflow-hidden hover-card">
-                <div class="card-body p-4 text-center">
-                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
-                        <i class="bi bi-truck text-success fs-1"></i>
-                    </div>
-                    <h4 class="fw-bold mb-2">Barang Masuk</h4>
-                    <p class="text-muted small mb-4">Input stok dari supplier.</p>
-                    <a href="{{ url_for('web.receiving_page') }}" class="btn btn-outline-success w-100 rounded-pill fw-bold">
-                        Input Masuk
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 shadow border-0 overflow-hidden hover-card">
-                <div class="card-body p-4 text-center">
-                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
-                        <i class="bi bi-cart-check text-primary fs-1"></i>
-                    </div>
-                    <h4 class="fw-bold mb-2">Penjualan (Kasir)</h4>
-                    <p class="text-muted small mb-4">Input barang keluar ke customer.</p>
-                    <a href="{{ url_for('sales.sales_page') }}" class="btn btn-primary w-100 rounded-pill fw-bold">
-    Input Penjualan
-</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 shadow border-0 overflow-hidden hover-card">
-                <div class="card-body p-4 text-center">
-                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
-                        <i class="bi bi-graph-up-arrow text-warning fs-1"></i>
-                    </div>
-                    <h4 class="fw-bold mb-2">Laporan & Grafik</h4>
-                    <p class="text-muted small mb-4">Analisa keuntungan & stok.</p>
-                    <a href="{{ url_for('web.dashboard') }}" class="btn btn-outline-dark w-100 rounded-pill fw-bold">
-                        Buka Dashboard
-                    </a>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-        <div class="col-md-5">
-            <div class="card h-100 shadow border-0 overflow-hidden hover-card">
-                <div class="card-body p-5 text-center">
-                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-4 mb-4">
-                        <i class="bi bi-speedometer2 text-primary display-4"></i>
+    <!-- Multi-Branch Analytics Section -->
+    <div class="row mt-5">
+        <!-- Chart 1: Multi-Branch Sales (Bar) -->
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-0 py-4 px-5">
+                    <h4 class="fw-bold text-dark mb-0"><i class="bi bi-buildings me-2 text-warning"></i>Performa
+                        Penjualan
+                        Cabang</h4>
+                    <small class="text-muted">Analitik real-time dari seluruh cabang Indonesia (Simulasi)</small>
+                </div>
+                <div class="card-body p-4">
+                    <div style="height: 350px; width: 100%;">
+                        <canvas id="branchChart"></canvas>
                     </div>
-                    <h3 class="fw-bold mb-3">Dashboard Admin</h3>
-                    <p class="text-muted mb-4">Lihat grafik penjualan, total pendapatan, dan laporan transaksi.</p>
-                    <a href="{{ url_for('web.dashboard') }}" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold">
-                        <i class="bi bi-bar-chart-line me-2"></i> Buka Dashboard
-                    </a>
                 </div>
             </div>
         </div>
 
+        <!-- Chart 2: Top Products (Doughnut) -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 py-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-pie-chart me-2 text-primary"></i>Produk Terlaris
+                    </h5>
+                    <small class="text-muted">Persentase TOP 5 Barang</small>
+                </div>
+                <div class="card-body p-4 d-flex align-items-center justify-content-center">
+                    <div style="height: 250px; width: 100%;">
+                        <canvas id="topProductsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 3: Revenue Trend (Line) -->
+        <div class="col-md-8 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 py-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-graph-up me-2 text-success"></i>Tren Pendapatan
+                    </h5>
+                    <small class="text-muted">Grafik penjualan 7 hari terakhir</small>
+                </div>
+                <div class="card-body p-4">
+                    <div style="height: 250px; width: 100%;">
+                        <canvas id="revenueTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
     <div class="text-center mt-5">
         <a href="{{ url_for('web.inventory') }}" class="text-decoration-none text-muted fw-bold">
             <i class="bi bi-list-ul me-1"></i> Lihat Semua Stok Barang
         </a>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- 1. BRANCH CHART (Bar) ---
+            const ctxBranch = document.getElementById('branchChart').getContext('2d');
+            const branchNames = JSON.parse('{{ branches.names | tojson | safe }}');
+            const branchSales = JSON.parse('{{ branches.sales | tojson | safe }}');
+            const branchColors = JSON.parse('{{ branches.colors | tojson | safe }}');
+
+            new Chart(ctxBranch, {
+                type: 'bar',
+                data: {
+                    labels: branchNames,
+                    datasets: [{
+                        label: 'Total Penjualan (Rp)',
+                        data: branchSales,
+                        backgroundColor: branchColors,
+                        borderRadius: 8,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { borderDash: [5, 5] },
+                            ticks: { callback: function (value) { return 'Rp ' + (value / 1000000).toLocaleString('id-ID') + ' Jt'; } }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // --- 2. TOP PRODUCTS (Doughnut) ---
+            const topNames = JSON.parse('{{ top_names | tojson | safe }}');
+            const topQtys = JSON.parse('{{ top_qtys | tojson | safe }}');
+
+            const ctxTop = document.getElementById('topProductsChart').getContext('2d');
+            if (!topNames || topNames.length === 0) {
+                // Placeholder logic if no data
+                new Chart(ctxTop, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Belum ada data'],
+                        datasets: [{ data: [1], backgroundColor: ['#eee'], borderWidth: 0 }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { tooltip: { enabled: false }, legend: { display: false } }
+                    }
+                });
+            } else {
+                new Chart(ctxTop, {
+                    type: 'doughnut',
+                    data: {
+                        labels: topNames,
+                        datasets: [{
+                            data: topQtys,
+                            backgroundColor: [
+                                '#c5a059', // Gold
+                                '#2c3e50', // Navy
+                                '#bdc3c7', // Silver
+                                '#e67e22', // Orange
+                                '#27ae60'  // Green
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+
+            // --- 3. REVENUE TREND (Line) ---
+            const trendDates = JSON.parse('{{ trend_dates | tojson | safe }}');
+            const trendValues = JSON.parse('{{ trend_values | tojson | safe }}');
+
+            const ctxTrend = document.getElementById('revenueTrendChart').getContext('2d');
+
+            // Gradient Fill
+            let gradient = ctxTrend.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(39, 174, 96, 0.2)'); // Light Green
+            gradient.addColorStop(1, 'rgba(39, 174, 96, 0)');
+
+            new Chart(ctxTrend, {
+                type: 'line',
+                data: {
+                    labels: trendDates,
+                    datasets: [{
+                        label: 'Pendapatan',
+                        data: trendValues,
+                        borderColor: '#27ae60',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#27ae60',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: function (v) { return 'Rp ' + new Intl.NumberFormat('id-ID').format(v); } }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        });
+    </script>
 </div>
 
 <style>
-    .hover-card { transition: transform 0.3s ease; }
-    .hover-card:hover { transform: translateY(-10px); }
+    .hover-card {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-card:hover {
+        transform: translateY(-10px);
+    }
 </style>
 {% endif %}
 
