@@ -1,12 +1,12 @@
 [build]
   publish = "app/static"
-  functions = "functions"
+  functions = "netlify/functions"
 
 [functions]
   external_node_modules = ["python-dotenv"]
 
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/app"
+  to = "/.netlify/functions/wms_handler"
   status = 200
   force = true
