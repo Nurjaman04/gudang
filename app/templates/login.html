@@ -4,49 +4,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Arcapada</title>
+    <title>Login - Arcapada WMS</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
     <style>
         body {
-            /* Background handled by style.css */
+            /* Handled by style.css (warehouse bg + overlay) */
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        .login-card {
+            background: rgba(255, 255, 255, 0.75);
+            /* Milky transparent */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+            padding: 40px;
+            transition: transform 0.3s ease;
         }
 
-        .form-control {
-            border-radius: 10px;
-            padding: 10px 15px;
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 60px rgba(183, 134, 40, 0.15);
+            /* Gold glow on hover */
         }
 
-        .btn-primary {
-            border-radius: 10px;
-            padding: 10px;
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 32px;
+            box-shadow: 0 10px 20px rgba(183, 134, 40, 0.3);
+        }
+
+        .form-floating>.form-control {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-floating>.form-control:focus {
+            background: #fff;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 4px rgba(183, 134, 40, 0.1);
+        }
+
+        .btn-google {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #555;
+            font-weight: 500;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn-google:hover {
+            background: #f8f9fa;
+            border-color: #d0d0d0;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+            border: none;
+            color: white;
             font-weight: 600;
-            background: #2a5298;
-            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(183, 134, 40, 0.3);
         }
 
-        .btn-primary:hover {
-            background: #1e3c72;
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(183, 134, 40, 0.4);
+            color: white;
         }
 
-        .input-group-text {
-            border-radius: 10px 0 0 10px;
-            border: none;
-            background: #f0f2f5;
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #999;
+            font-size: 0.85rem;
+            margin: 25px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: .5em;
         }
     </style>
 </head>
@@ -54,21 +131,22 @@
 <body>
 
     <div class="container d-flex justify-content-center">
-        <div class="card p-4">
+        <div class="login-card">
+
             <div class="text-center mb-4">
-                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                    style="width: 60px; height: 60px;">
-                    <i class="bi bi-box-seam-fill fs-2"></i>
+                <div class="brand-logo">
+                    <i class="bi bi-box-seam-fill"></i>
                 </div>
-                <h3 class="fw-bold text-primary">Arcapada WMS</h3>
-                <p class="text-muted small">Silakan login untuk mengelola gudang</p>
+                <h3 class="fw-bold mb-1" style="color: var(--primary-color);">ARCAPADA</h3>
+                <p class="text-muted small">Professional Warehouse Management</p>
             </div>
 
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for category, message in messages %}
-            <div class="alert alert-{{ category }} alert-dismissible fade show p-2 small" role="alert">
-                {{ message }}
+            <div class="alert alert-{{ category }} alert-dismissible fade show p-2 small border-0 shadow-sm mb-4"
+                role="alert">
+                <i class="bi bi-info-circle me-2"></i>{{ message }}
                 <button type="button" class="btn-close small p-2" data-bs-dismiss="alert"></button>
             </div>
             {% endfor %}
@@ -76,43 +154,41 @@
             {% endwith %}
 
             <form action="{{ url_for('auth.login_web') }}" method="POST">
-                <div class="mb-3">
-                    <label class="form-label small fw-bold">Username</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                        <input type="text" class="form-control" name="username" placeholder="Masukkan username" required
-                            autofocus>
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label class="form-label small fw-bold">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-key"></i></span>
-                        <input type="password" class="form-control" name="password" placeholder="Masukkan password"
-                            required>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary w-100 mb-3">Masuk ke Sistem</button>
-
-                <div class="text-center mb-3">
-                    <span class="text-muted small">atau</span>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Username"
+                        required autofocus>
+                    <label for="username" class="text-muted">Username</label>
                 </div>
 
-                <a href="{{ url_for('auth.google_login') }}"
-                    class="btn btn-light w-100 mb-3 d-flex align-items-center justify-content-center border">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
-                        width="20" class="me-2">
-                    Masuk dengan Google
-                </a>
+                <div class="form-floating mb-4">
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Password"
+                        required>
+                    <label for="password" class="text-muted">Password</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary-custom w-100 mb-3">
+                    Masuk ke Sistem
+                </button>
             </form>
 
+            <div class="divider">ATAU</div>
+
+            <a href="{{ url_for('auth.google_login') }}"
+                class="btn btn-google w-100 mb-4 d-flex align-items-center justify-content-center py-2">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20"
+                    class="me-2">
+                Masuk dengan Google
+            </a>
+
             <div class="text-center">
-                <small class="text-muted">Belum punya akun? <a href="{{ url_for('auth.register') }}"
-                        class="text-decoration-none fw-bold">Daftar disini</a></small>
+                <p class="text-muted small mb-0">Belum memiliki akun?</p>
+                <a href="{{ url_for('auth.register') }}" class="text-decoration-none fw-bold"
+                    style="color: var(--accent-color);">Daftar disini</a>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 

@@ -10,7 +10,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 def login_web():
     # Jika sudah login, lempar ke dashboard
     if 'user_id' in session:
-        return redirect(url_for('web.dashboard'))
+        return redirect(url_for('web.index'))
 
     if request.method == 'POST':
         username = request.form['username']
@@ -25,7 +25,7 @@ def login_web():
             session['role'] = user.role
             session['username'] = user.username
             flash(f'Selamat datang, {user.username}!', 'success')
-            return redirect(url_for('web.dashboard'))
+            return redirect(url_for('web.index'))
         else:
             flash('Username atau Password salah!', 'danger')
             
@@ -36,7 +36,7 @@ def login_web():
 def register():
     # Jika sudah login, logout dulu atau redirect
     if 'user_id' in session:
-        return redirect(url_for('web.dashboard'))
+        return redirect(url_for('web.index'))
 
     if request.method == 'POST':
         username = request.form['username']
@@ -89,7 +89,7 @@ def google_callback():
     # token = oauth.google.authorize_access_token()
     # verify user info...
     # create user if not exists...
-    return redirect(url_for('web.dashboard'))
+    return redirect(url_for('web.index'))
 
 # Route untuk Logout
 @auth_bp.route('/logout')

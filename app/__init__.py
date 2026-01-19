@@ -24,14 +24,9 @@ def create_app():
         app.register_blueprint(web_bp)  # <--- JANGAN HILANG
 
         # Context Processor untuk Notifikasi (Biarkan jika sudah ada)
-        from app.models import Product
-        @app.context_processor
-        def inject_notifications():
-            try:
-                low_stock = Product.query.filter(Product.stock_quantity <= Product.min_stock_threshold).all()
-                return dict(notifikasi_stok=low_stock)
-            except:
-                return dict(notifikasi_stok=[])
+        # Context Processor untuk Notifikasi
+        from app.context_processor import inject_notifications
+        app.context_processor(inject_notifications)
 
         db.create_all()
 
