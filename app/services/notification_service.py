@@ -3,31 +3,49 @@ import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-# --- KONFIGURASI (Ganti dengan data asli Anda) ---
-EMAIL_PENGIRIM = "email_anda@gmail.com"
-EMAIL_APP_PASSWORD = "xxxx xxxx xxxx xxxx" 
-EMAIL_PENERIMA = "email_bos@gmail.com"
+import os
 
-WA_PHONE = "628xxxxxxxxxx"
-WA_API_KEY = "xxxxxx"
+# --- KONFIGURASI (Diambil dari Environment Variables) ---
+EMAIL_PENGIRIM = os.environ.get('EMAIL_USER', "email_anda@gmail.com")
+EMAIL_APP_PASSWORD = os.environ.get('EMAIL_PASS', "xxxx xxxx xxxx xxxx")
+EMAIL_PENERIMA = os.environ.get('EMAIL_RECEIVER', "email_bos@gmail.com")
 
-def kirim_email_low_stock(product_name, sisa_stok):
+WA_PHONE = os.environ.get('WA_PHONE', "628xxxxxxxxxx")
+WA_API_KEY = os.environ.get('WA_API_KEY', "xxxxxx")
+
+def kirim_email_low_stock(product_name, sisa_stok, recipients=None):
+    # Cek apakah email sudah dikonfigurasi
+    if "email_anda" in EMAIL_PENGIRIM or "xxxx" in EMAIL_APP_PASSWORD:
+        print("⚠️  Email belum dikonfigurasi. Lewati pengiriman email.")
+        return
+
+    # Tentukan penerima
+    target_emails = recipients if recipients else [EMAIL_PENERIMA]
+    
+    if not target_emails:
+        print("⚠️ Tidak ada penerima email yang valid.")
+        return
+
     try:
-        subject = f"⚠️ PERINGATAN: Stok {product_name} Menipis!"
-        body = f"Stok barang {product_name} tinggal {sisa_stok}. Segera restock!"
-
-        msg = MIMEMultipart()
-        msg['From'] = EMAIL_PENGIRIM
-        msg['To'] = EMAIL_PENERIMA
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain'))
-
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
+        # Gunakan SMTP_SSL untuk port 465
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.login(EMAIL_PENGIRIM, EMAIL_APP_PASSWORD)
-        server.send_message(msg)
+
+        # Kirim email satu per satu agar header 'To' sesuai dengan penerima
+        for email_tujuan in target_emails:
+            msg = MIMEMultipart()
+            msg['From'] = EMAIL_PENGIRIM
+            msg['To'] = email_tujuan
+            msg['Subject'] = f"⚠️ PERINGATAN: Stok {product_name} Menipis!"
+            
+            body = f"Halo,\n\nStok barang {product_name} saat ini tinggal {sisa_stok}. Segera lakukan restock.\n\nSalam,\nSistem Gudang"
+            msg.attach(MIMEText(body, 'plain'))
+            
+            server.send_message(msg)
+            print(f"✅ Email terkirim ke: {email_tujuan}")
+
         server.quit()
-        print("✅ Email terkirim.")
+        
     except Exception as e:
         print(f"❌ Gagal kirim email: {e}")
 

@@ -49,7 +49,12 @@ def process_sales_web():
 
         # Cek Notifikasi
         if product.stock_quantity <= product.min_stock_threshold:
-            t1 = threading.Thread(target=kirim_email_low_stock, args=(product.name, product.stock_quantity))
+            # Ambil semua email user yang terdaftar
+            from app.models import User
+            users = User.query.all()
+            recipient_emails = [u.email for u in users if u.email]
+            
+            t1 = threading.Thread(target=kirim_email_low_stock, args=(product.name, product.stock_quantity, recipient_emails))
             t2 = threading.Thread(target=kirim_wa_low_stock, args=(product.name, product.stock_quantity))
             t1.start()
             t2.start()

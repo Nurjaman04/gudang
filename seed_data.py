@@ -15,10 +15,17 @@ def seed():
         # Password asli: 'admin123' (akan di-hash/dienkripsi)
         admin = User(
             username='admin', 
+            email='admin@example.com', # Default email
             password_hash=generate_password_hash('admin123'), 
             role='admin'
         )
         db.session.add(admin)
+        
+        # Tambahan user lain
+        staff = User(username='staff', email='staff@example.com', password_hash=generate_password_hash('staff123'), role='staff')
+        manager = User(username='manager', email='manager@example.com', password_hash=generate_password_hash('manager123'), role='manager')
+        
+        db.session.add_all([staff, manager])
 
         print("2. Menambahkan Produk...")
         p1 = Product(sku="LP-001", name="Laptop Gaming ASUS", price=15000000, cost=12000000, stock_quantity=5, min_stock_threshold=5)
