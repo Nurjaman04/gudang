@@ -10,6 +10,10 @@ def add_product_web():
     # Cek login (Keamanan)
     if 'user_id' not in session:
         return redirect(url_for('auth.login_web'))
+    
+    if session.get('role') not in ['admin', 'manager'] and 'inventory' not in session.get('features', []):
+        flash('Anda tidak memiliki akses ke fitur ini.', 'danger')
+        return redirect(url_for('web.index'))
 
     try:
         # Ambil data dari form HTML
@@ -61,6 +65,10 @@ def restock_product_web():
     if 'user_id' not in session:
         return redirect(url_for('auth.login_web'))
 
+    if session.get('role') not in ['admin', 'manager'] and 'inventory' not in session.get('features', []):
+        flash('Anda tidak memiliki akses ke fitur ini.', 'danger')
+        return redirect(url_for('web.index'))
+
     try:
         p_id = request.form['product_id']
         amount = int(request.form['amount'])
@@ -86,12 +94,19 @@ def restock_product_web():
     except Exception as e:
         flash(f'Gagal restock: {str(e)}', 'danger')
         
+    return redirect(url_for('web.inventory'))
+        
+    return redirect(url_for('web.inventory'))
 # Tambahkan di inventory_controller.py
 
 @inventory_bp.route('/process_receiving', methods=['POST'])
 def receiving_process():
     if 'user_id' not in session:
         return redirect(url_for('auth.login_web'))
+
+    if session.get('role') not in ['admin', 'manager'] and 'inventory' not in session.get('features', []):
+        flash('Anda tidak memiliki akses ke fitur ini.', 'danger')
+        return redirect(url_for('web.index'))
 
     try:
         p_id = request.form['product_id']

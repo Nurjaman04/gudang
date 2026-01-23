@@ -5,3 +5,5 @@ matplotlib
 APScheduler
 aws-wsgi
 python-dotenv
+Authlib
+requests

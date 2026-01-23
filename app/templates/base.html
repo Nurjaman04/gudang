@@ -42,6 +42,7 @@
                     <span>Dashboard</span>
                 </a>
             </li>
+            {% if session.role in ['admin', 'manager'] or 'analytics' in session.features %}
             <li>
                 <a href="{{ url_for('web.analytics') }}"
                     class="menu-link {% if request.endpoint == 'web.analytics' %}active{% endif %}">
@@ -49,7 +50,9 @@
                     <span>Analitik</span>
                 </a>
             </li>
+            {% endif %}
 
+            {% if session.role in ['admin', 'manager'] or 'inventory' in session.features %}
             <li class="menu-category">Operasional</li>
             <li>
                 <a href="{{ url_for('web.inventory') }}"
@@ -65,6 +68,8 @@
                     <span>Penerimaan</span>
                 </a>
             </li>
+            {% endif %}
+            {% if session.role in ['admin', 'manager'] or 'sales' in session.features %}
             <li>
                 <a href="{{ url_for('sales.sales_page') }}"
                     class="menu-link {% if request.endpoint == 'sales.sales_page' %}active{% endif %}">
@@ -72,7 +77,9 @@
                     <span>Penjualan</span>
                 </a>
             </li>
+            {% endif %}
 
+            {% if session.role in ['admin', 'manager'] or 'analytics' in session.features %}
             <li class="menu-category">Laporan</li>
             <li>
                 <a href="{{ url_for('web.laporan_final') }}"
@@ -81,6 +88,18 @@
                     <span>Laporan Akhir</span>
                 </a>
             </li>
+            {% endif %}
+
+            {% if session.role in ['admin', 'manager'] or 'users' in session.features %}
+            <li class="menu-category">Pengaturan</li>
+            <li>
+                <a href="{{ url_for('user.index') }}"
+                    class="menu-link {% if request.endpoint == 'user.index' or request.endpoint == 'user.new' or request.endpoint == 'user.edit' %}active{% endif %}">
+                    <i class="bi bi-people"></i>
+                    <span>Pengguna</span>
+                </a>
+            </li>
+            {% endif %}
             {% else %}
             <li class="menu-item">
                 <a href="{{ url_for('auth.login_web') }}" class="menu-link">
@@ -109,22 +128,25 @@
 
             <div class="d-flex align-items-center gap-3">
                 <!-- Notifications -->
+                <!-- Notifications -->
                 <div class="dropdown">
+                    {% set notifs = notifications() %}
                     <a href="#" class="position-relative text-dark" data-bs-toggle="dropdown">
                         <i class="bi bi-bell fs-5"></i>
-                        {% if notifikasi_stok and notifikasi_stok|length > 0 %}
+                        {% if notifs.count > 0 %}
                         <span
                             class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
                             <span class="visually-hidden">New alerts</span>
                         </span>
                         {% endif %}
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="width: 320px;">
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0"
+                        style="width: 320px; max-height: 400px; overflow-y: auto;">
                         <li>
                             <h6 class="dropdown-header text-uppercase small fw-bold">Notifikasi Sistem</h6>
                         </li>
-                        {% if notifikasi_stok and notifikasi_stok|length > 0 %}
-                        {% for item in notifikasi_stok %}
+                        {% if notifs.count > 0 %}
+                        {% for item in notifs.items %}
                         <li>
                             <a class="dropdown-item d-flex align-items-center py-2 border-bottom"
                                 href="{{ url_for('web.inventory') }}">
@@ -133,7 +155,7 @@
                                 </div>
                                 <div>
                                     <p class="mb-0 fw-bold small text-dark">{{ item.name }}</p>
-                                    <small class="text-muted">Stok menipis: {{ item.stock_quantity }}</small>
+                                    <small class="text-muted">Stok menipis: {{ item.stock_quantity }} Unit</small>
                                 </div>
                             </a>
                         </li>
@@ -153,9 +175,9 @@
                         data-bs-toggle="dropdown">
                         <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
                             style="width: 35px; height: 35px;">
-                            A
+                            {{ session.get('username', 'Admin')[0].upper() }}
                         </div>
-                        <span class="d-none d-md-block fw-medium">Admin</span>
+                        <span class="d-none d-md-block fw-medium">{{ session.get('username', 'Admin') }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                         <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i> Profile</a></li>

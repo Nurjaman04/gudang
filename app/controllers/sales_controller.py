@@ -16,12 +16,18 @@ sales_bp = Blueprint('sales', __name__, url_prefix='/sales')
 @sales_bp.route('/web/form', methods=['GET'])
 def sales_page():
     if 'user_id' not in session: return redirect(url_for('auth.login_web'))
+    if session.get('role') not in ['admin', 'manager'] and 'sales' not in session.get('features', []):
+        flash('Anda tidak memiliki akses ke fitur ini.', 'danger')
+        return redirect(url_for('web.index'))
     products = Product.query.filter(Product.stock_quantity > 0).all()
     return render_template('sales.html', products=products)
 
 @sales_bp.route('/web/process', methods=['POST'])
 def process_sales_web():
     if 'user_id' not in session: return redirect(url_for('auth.login_web'))
+    if session.get('role') not in ['admin', 'manager'] and 'sales' not in session.get('features', []):
+        flash('Anda tidak memiliki akses ke fitur ini.', 'danger')
+        return redirect(url_for('web.index'))
 
     try:
         p_id = request.form['product_id']
@@ -51,8 +57,26 @@ def process_sales_web():
         if product.stock_quantity <= product.min_stock_threshold:
             # Ambil semua email user yang terdaftar
             from app.models import User
+            # Ambil semua email user yang memiliki fitur 'notifications'
+            from app.models import User
+            import json
+            
             users = User.query.all()
-            recipient_emails = [u.email for u in users if u.email]
+            recipient_emails = []
+            
+            for u in users:
+                if u.email:
+                    # Cek fitur user
+                    user_features = []
+                    if u.features:
+                        try:
+                            user_features = json.loads(u.features)
+                        except:
+                            pass
+                    
+                    # Jika user punya fitur 'notifications', masukkan ke daftar
+                    if 'notifications' in user_features:
+                        recipient_emails.append(u.email)
             
             t1 = threading.Thread(target=kirim_email_low_stock, args=(product.name, product.stock_quantity, recipient_emails))
             t2 = threading.Thread(target=kirim_wa_low_stock, args=(product.name, product.stock_quantity))

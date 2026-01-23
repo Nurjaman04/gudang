@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{% if user %}Edit Pengguna{% else %}Tambah Pengguna Baru{% endif %}</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <form method="POST">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username"
+                    value="{{ user.username if user else '' }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email"
+                    value="{{ user.email if user else '' }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Password {% if user %}<small class="text-muted">(Kosongkan jika
+                        tidak ingin mengubah)</small>{% endif %}</label>
+                <input type="password" class="form-control" id="password" name="password" {% if not user %}required{%
+                    endif %}>
+            </div>
+
+            <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <select class="form-select" id="role" name="role">
+                    <option value="staff" {% if user and user.role=='staff' %}selected{% endif %}>Staff</option>
+                    <option value="manager" {% if user and user.role=='manager' %}selected{% endif %}>Manager</option>
+                    <option value="admin" {% if user and user.role=='admin' %}selected{% endif %}>Admin</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fitur yang Diizinkan</label>
+                <div class="card p-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="features" value="inventory"
+                            id="feature_inventory" {% if 'inventory' in current_features %}checked{% endif %}>
+                        <label class="form-check-label" for="feature_inventory">
+                            Stok / Inventory
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="features" value="sales" id="feature_sales"
+                            {% if 'sales' in current_features %}checked{% endif %}>
+                        <label class="form-check-label" for="feature_sales">
+                            Kasir / Sales
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="features" value="analytics"
+                            id="feature_analytics" {% if 'analytics' in current_features %}checked{% endif %}>
+                        <label class="form-check-label" for="feature_analytics">
+                            Laporan / Analytics
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="features" value="users" id="feature_users"
+                            {% if 'users' in current_features %}checked{% endif %}>
+                        <label class="form-check-label" for="feature_users">
+                            Manajemen Pengguna
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="features" value="notifications"
+                            id="feature_notifications" {% if 'notifications' in current_features %}checked{% endif %}>
+                        <label class="form-check-label" for="feature_notifications">
+                            Menerima Notifikasi (Email)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Simpan</button>
+            <a href="{{ url_for('user.index') }}" class="btn btn-secondary">Batal</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

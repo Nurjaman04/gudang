@@ -24,6 +24,12 @@ def login_web():
             session['user_id'] = user.id
             session['role'] = user.role
             session['username'] = user.username
+            try:
+                import json
+                session['features'] = json.loads(user.features) if user.features else []
+            except:
+                session['features'] = []
+            
             flash(f'Selamat datang, {user.username}!', 'success')
             return redirect(url_for('web.index'))
         else:
@@ -71,25 +77,82 @@ def register():
 
     return render_template('register.html')
 
-# --- Google OAuth Routes (Placeholder Implementation) ---
-# Note: Requires 'authlib' or 'flask-dance' for real production usage.
-# For now, we simulate the flow or provide a stub.
+# --- Google OAuth Routes ---
+from app import oauth
+import os
+
+# Konfigurasi Google Client
+# Pastikan GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET ada di .env
+google = oauth.register(
+    name='google',
+    client_id=os.environ.get('GOOGLE_CLIENT_ID'),
+    client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={
+        'scope': 'openid email profile'
+    }
+)
 
 @auth_bp.route('/google')
 def google_login():
-    # In a real app, this would redirect to Google's OAuth URL
-    # return oauth.google.authorize_redirect(url_for('auth.google_callback', _external=True))
-    
-    # Simulation for Demo purposes (since we might not have API keys set up)
-    flash("Fitur Google Login memerlukan konfigurasi API Key (CLIENT_ID).", "warning")
-    return redirect(url_for('auth.login_web'))
+    # Redirect ke Google untuk login
+    redirect_uri = url_for('auth.google_callback', _external=True)
+    return google.authorize_redirect(redirect_uri)
 
 @auth_bp.route('/google/callback')
 def google_callback():
-    # token = oauth.google.authorize_access_token()
-    # verify user info...
-    # create user if not exists...
-    return redirect(url_for('web.index'))
+    try:
+        token = google.authorize_access_token()
+        user_info = token['userinfo']
+        
+        email = user_info['email']
+        name = user_info.get('name', email.split('@')[0])
+        
+        # Cek apakah user sudah ada
+        user = User.query.filter_by(email=email).first()
+        
+        if not user:
+            # Buat user baru jika belum ada
+            # Generate password acak karena login via Google
+            import secrets
+            random_password = secrets.token_hex(16)
+            
+            # Cek username conflict
+            base_username = name.replace(" ", "").lower()
+            username = base_username
+            counter = 1
+            while User.query.filter_by(username=username).first():
+                username = f"{base_username}{counter}"
+                counter += 1
+            
+            user = User(
+                username=username,
+                email=email,
+                password_hash=generate_password_hash(random_password),
+                role='staff' # Default role
+            )
+            db.session.add(user)
+            db.session.commit()
+            flash(f'Akun berhasil dibuat! Login sebagai {username}.', 'success')
+            
+        # Login user
+        session['user_id'] = user.id
+        session['user_id'] = user.id
+        session['role'] = user.role
+        session['username'] = user.username
+        try:
+            import json
+            session['features'] = json.loads(user.features) if user.features else []
+        except:
+            session['features'] = []
+        
+        flash(f'Selamat datang, {user.username}!', 'success')
+        
+        return redirect(url_for('web.index'))
+        
+    except Exception as e:
+        flash(f'Gagal login Google: {str(e)}', 'danger')
+        return redirect(url_for('auth.login_web'))
 
 # Route untuk Logout
 @auth_bp.route('/logout')
