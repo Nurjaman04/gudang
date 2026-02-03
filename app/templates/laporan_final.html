@@ -2,17 +2,18 @@
 
 {% block content %}
 <div class="container pb-5">
-    
+
     <div class="d-flex justify-content-between align-items-center mb-4 no-print">
         <div>
             <h2 class="fw-bold text-primary"><i class="bi bi-file-earmark-bar-graph"></i> Laporan Transaksi</h2>
             <p class="text-muted">Rekapitulasi data barang masuk dan keluar.</p>
         </div>
         <div>
-            <a href="{{ url_for('web.export_excel', start_date=start_date, end_date=end_date) }}" class="btn btn-success me-2">
+            <a href="{{ url_for('web.export_excel', start_date=start_date, end_date=end_date) }}"
+                class="btn btn-success me-2">
                 <i class="bi bi-file-earmark-excel"></i> Export Excel
             </a>
-            
+
             <button onclick="window.print()" class="btn btn-outline-dark">
                 <i class="bi bi-printer"></i> Cetak PDF
             </button>
@@ -66,6 +67,8 @@
         </div>
     </div>
 
+
+
     <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
         <div class="card-header bg-white p-3 border-bottom">
             <h5 class="mb-0 fw-bold">Rincian Transaksi</h5>
@@ -93,28 +96,36 @@
                         <td class="fw-bold text-primary">#{{ t.reference or '-' }}</td>
                         <td>
                             <div class="fw-bold">{{ t.product.name }}</div>
-                            <small class="text-muted">SKU: {{ t.product.sku }}</small>
+                            <small class="text-muted">Kode Master: {{ t.product.sku }}</small>
                         </td>
                         <td>
                             {% if t.transaction_type == 'IN' %}
-                                <span class="badge bg-success bg-opacity-10 text-success px-3">MASUK</span>
+                            <span class="badge bg-success bg-opacity-10 text-success px-3">MASUK</span>
+                            {% elif t.transaction_type == 'TRANSFER_IN' %}
+                            <span class="badge bg-info bg-opacity-10 text-info px-3">TRANSFER MASUK</span>
+                            {% elif t.transaction_type == 'TRANSFER_OUT' %}
+                            <span class="badge bg-warning bg-opacity-10 text-warning px-3">TRANSFER KELUAR</span>
+                            {% elif t.transaction_type == 'OPNAME' %}
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary px-3">STOK OPNAME</span>
                             {% else %}
-                                <span class="badge bg-primary bg-opacity-10 text-primary px-3">KELUAR</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary px-3">KELUAR</span>
                             {% endif %}
                         </td>
                         <td class="text-center fw-bold">{{ t.quantity }}</td>
                         <td>
                             {% if t.transaction_type == 'OUT' %}
-                                <span class="text-success fw-bold">+ Rp {{ "{:,.0f}".format(t.total_amount) }}</span>
+                            <span class="text-success fw-bold">+ Rp {{ "{:,.0f}".format(t.total_amount) }}</span>
                             {% else %}
-                                <span class="text-muted">-</span>
+                            <span class="text-muted">-</span>
                             {% endif %}
                         </td>
                         <td class="text-muted small">
                             {% if t.supplier %}
-                                <i class="bi bi-person me-1"></i> {{ t.supplier }}
+                            <i class="bi bi-person me-1"></i> {{ t.supplier }}
+                            {% elif t.branch_name %}
+                            <i class="bi bi-building me-1"></i> {{ t.branch_name }}
                             {% else %}
-                                -
+                            -
                             {% endif %}
                         </td>
                     </tr>
@@ -134,9 +145,18 @@
 
 <style>
     @media print {
-        .no-print { display: none !important; }
-        .card { border: 1px solid #ddd !important; box-shadow: none !important; }
-        body { background-color: white; }
+        .no-print {
+            display: none !important;
+        }
+
+        .card {
+            border: 1px solid #ddd !important;
+            box-shadow: none !important;
+        }
+
+        body {
+            background-color: white;
+        }
     }
 </style>
 {% endblock %}

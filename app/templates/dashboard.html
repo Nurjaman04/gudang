@@ -1,124 +1,220 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container pb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-5">
         <div>
-            <h2 class="fw-bold text-primary">Dashboard Overview</h2>
-            <p class="text-muted">Pantau aktivitas toko Anda hari ini.</p>
+            <h2 class="fw-bold hero-title text-dark">Dashboard Overview</h2>
+            <p class="text-muted hero-subtitle">Pantau aktivitas toko Anda secara real-time.</p>
         </div>
         <div class="text-end">
-            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm">
-                <i class="bi bi-calendar-event me-2 text-primary"></i> <span id="currentDate" class="fw-bold"></span>
+            <span class="badge glass-panel text-dark border px-4 py-2 rounded-pill shadow-sm">
+                <i class="bi bi-calendar-event me-2 text-gold"></i> <span id="currentDate" class="fw-bold"
+                    style="font-family: 'Poppins', sans-serif;"></span>
             </span>
         </div>
     </div>
 
+    <!-- Summary Cards -->
     <div class="row g-4 mb-5">
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white;">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="bg-white bg-opacity-25 rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                            <i class="bi bi-wallet2 fs-4"></i>
+            <div class="card border-0 shadow-lg h-100 overflow-hidden text-white"
+                style="background: linear-gradient(135deg, #1c1c1c 0%, #2c3e50 100%); border-radius: 20px;">
+                <div class="card-body p-4 position-relative">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="bg-white bg-opacity-10 rounded-circle p-3 d-flex align-items-center justify-content-center shadow-inner"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-wallet2 fs-3 text-gold"></i>
                         </div>
                         <div class="dropdown">
-                            <button class="btn btn-link text-white p-0" type="button" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="{{ url_for('web.laporan_final') }}">Lihat Laporan Lengkap</a></li>
+                            <button class="btn btn-link text-white opacity-50 p-0" type="button"
+                                data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                <li><a class="dropdown-item" href="{{ url_for('web.laporan_final') }}">Lihat Laporan
+                                        Lengkap</a></li>
                             </ul>
                         </div>
                     </div>
-                    <h6 class="text-white text-opacity-75 text-uppercase small fw-bold">Pendapatan Hari Ini</h6>
-                    <h2 class="fw-bold mb-0">Rp {{ "{:,.0f}".format(summary.total_revenue) }}</h2>
+                    <h6 class="text-white text-opacity-75 text-uppercase small fw-bold letter-spacing-1">Pendapatan Hari
+                        Ini</h6>
+                    <h2 class="fw-bold mb-0 display-6" style="font-family: 'Playfair Display', serif;">Rp {{
+                        "{:,.0f}".format(summary.total_revenue) }}</h2>
+
+                    <!-- Decor Circle -->
+                    <div class="position-absolute rounded-circle"
+                        style="width: 150px; height: 150px; background: rgba(183, 134, 40, 0.1); top: -50px; right: -50px; filter: blur(40px);">
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100 bg-white">
+            <div class="card border-0 shadow-sm h-100 glass-card" style="border-radius: 20px;">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                            <i class="bi bi-box-seam fs-4"></i>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 d-flex align-items-center justify-content-center"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-box-seam fs-3"></i>
                         </div>
                     </div>
-                    <h6 class="text-muted text-uppercase small fw-bold">Terjual Hari Ini</h6>
-                    <h2 class="fw-bold mb-0 text-dark">{{ summary.total_items_sold }} <span class="fs-6 text-muted fw-normal">Unit</span></h2>
+                    <h6 class="text-muted text-uppercase small fw-bold letter-spacing-1">Terjual Hari Ini</h6>
+                    <h2 class="fw-bold mb-0 text-dark display-6" style="font-family: 'Playfair Display', serif;">{{
+                        summary.total_items_sold }} <span class="fs-5 text-muted fw-normal font-sans">Unit</span></h2>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100 bg-white">
+            <div class="card border-0 shadow-sm h-100 glass-card" style="border-radius: 20px;">
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                            <i class="bi bi-graph-up-arrow fs-4"></i>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 d-flex align-items-center justify-content-center"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-graph-up-arrow fs-3"></i>
                         </div>
                     </div>
-                    <h6 class="text-muted text-uppercase small fw-bold">Rata-rata Transaksi</h6>
-                    <h2 class="fw-bold mb-0 text-dark">Rp {{ "{:,.0f}".format(summary.average_order_value) }}</h2>
+                    <h6 class="text-muted text-uppercase small fw-bold letter-spacing-1">Rata-rata Transaksi</h6>
+                    <h2 class="fw-bold mb-0 text-dark display-6" style="font-family: 'Playfair Display', serif;">Rp {{
+                        "{:,.0f}".format(summary.average_order_value) }}</h2>
                 </div>
             </div>
         </div>
     </div>
 
-    <h5 class="fw-bold mb-3"><i class="bi bi-lightning-charge-fill text-warning me-2"></i>Aksi Cepat</h5>
+    <!-- Charts Section -->
+    <div class="row g-4 mb-5">
+        <!-- Sales Chart -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm h-100 glass-panel" style="border-radius: 20px;">
+                <div class="card-header bg-transparent p-4 border-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-activity me-2 text-gold"></i>Tren Penjualan
+                        </h5>
+                        <small class="text-muted">Performa 7 hari terakhir</small>
+                    </div>
+                    <a href="{{ url_for('web.analytics') }}"
+                        class="btn btn-sm btn-outline-dark rounded-pill px-4">Detail Analytics</a>
+                </div>
+                <div class="card-body p-4">
+                    <canvas id="salesChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stock Chart -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 glass-panel" style="border-radius: 20px;">
+                <div class="card-header bg-transparent p-4 border-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-pie-chart me-2 text-gold"></i>Distribusi Stok
+                        </h5>
+                        <small class="text-muted">Per Kategori</small>
+                    </div>
+                    <a href="{{ url_for('web.inventory') }}" class="btn btn-sm btn-outline-dark rounded-pill px-3"><i
+                            class="bi bi-arrow-right"></i></a>
+                </div>
+                <div class="card-body d-flex align-items-center justify-content-center position-relative">
+                    <div style="width: 100%; height: 280px;">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <h5 class="fw-bold mb-4 ps-2"><i class="bi bi-stars text-gold me-2"></i>Aksi Cepat</h5>
     <div class="row g-3 mb-5">
         <div class="col-md-3">
-            <a href="{{ url_for('sales.sales_page') }}" class="btn btn-primary w-100 py-3 rounded-4 shadow-sm fw-bold text-start">
-                <i class="bi bi-cart-plus me-2"></i> Kasir Baru
+            <a href="{{ url_for('sales.sales_page') }}"
+                class="btn btn-white w-100 py-4 rounded-4 shadow-sm hover-lift text-start border-0 position-relative overflow-hidden group-action">
+                <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                    <i class="bi bi-cart-plus fs-1 text-primary"></i>
+                </div>
+                <div class="position-relative z-index-1">
+                    <i class="bi bi-cart-plus fs-3 text-primary mb-2 d-block"></i>
+                    <span class="fw-bold text-dark">Kasir Baru</span>
+                    <p class="text-muted small mb-0">Buat transaksi penjualan</p>
+                </div>
             </a>
         </div>
         <div class="col-md-3">
-            <a href="{{ url_for('web.receiving_page') }}" class="btn btn-success w-100 py-3 rounded-4 shadow-sm fw-bold text-start text-white">
-                <i class="bi bi-arrow-down-square me-2"></i> Barang Masuk
+            <a href="{{ url_for('web.receiving_page') }}"
+                class="btn btn-white w-100 py-4 rounded-4 shadow-sm hover-lift text-start border-0 position-relative overflow-hidden group-action">
+                <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                    <i class="bi bi-arrow-down-square fs-1 text-success"></i>
+                </div>
+                <div class="position-relative z-index-1">
+                    <i class="bi bi-arrow-down-square fs-3 text-success mb-2 d-block"></i>
+                    <span class="fw-bold text-dark">Barang Masuk</span>
+                    <p class="text-muted small mb-0">Restock inventory</p>
+                </div>
             </a>
         </div>
         <div class="col-md-3">
-            <a href="{{ url_for('web.inventory') }}" class="btn btn-info w-100 py-3 rounded-4 shadow-sm fw-bold text-start text-white">
-                <i class="bi bi-box-seam me-2"></i> Cek Stok
+            <a href="{{ url_for('web.inventory') }}"
+                class="btn btn-white w-100 py-4 rounded-4 shadow-sm hover-lift text-start border-0 position-relative overflow-hidden group-action">
+                <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                    <i class="bi bi-box-seam fs-1 text-info"></i>
+                </div>
+                <div class="position-relative z-index-1">
+                    <i class="bi bi-box-seam fs-3 text-info mb-2 d-block"></i>
+                    <span class="fw-bold text-dark">Cek Stok</span>
+                    <p class="text-muted small mb-0">Lihat ketersediaan</p>
+                </div>
             </a>
         </div>
         <div class="col-md-3">
-            <a href="{{ url_for('web.laporan_final') }}" class="btn btn-dark w-100 py-3 rounded-4 shadow-sm fw-bold text-start">
-                <i class="bi bi-file-earmark-bar-graph me-2"></i> Laporan
+            <a href="{{ url_for('web.laporan_final') }}"
+                class="btn btn-white w-100 py-4 rounded-4 shadow-sm hover-lift text-start border-0 position-relative overflow-hidden group-action">
+                <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                    <i class="bi bi-file-earmark-bar-graph fs-1 text-warning"></i>
+                </div>
+                <div class="position-relative z-index-1">
+                    <i class="bi bi-file-earmark-bar-graph fs-3 text-warning mb-2 d-block"></i>
+                    <span class="fw-bold text-dark">Laporan</span>
+                    <p class="text-muted small mb-0">Analisis kinerja</p>
+                </div>
             </a>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header bg-white p-3 border-bottom">
-            <h5 class="mb-0 fw-bold">Transaksi Terakhir</h5>
+    <!-- Recent Transactions -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden glass-panel">
+        <div class="card-header bg-transparent p-4 border-0">
+            <h5 class="mb-0 fw-bold text-dark">Transaksi Terakhir</h5>
         </div>
         <div class="card-body p-0">
             <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light">
+                <thead class="bg-light bg-opacity-50">
                     <tr>
-                        <th class="ps-4">Waktu</th>
-                        <th>Ref</th>
-                        <th>Item</th>
-                        <th>Qty</th>
-                        <th>Total</th>
-                        <th>Status</th>
+                        <th class="ps-4 py-3 text-uppercase text-muted small fw-bold">Waktu</th>
+                        <th class="py-3 text-uppercase text-muted small fw-bold">Ref</th>
+                        <th class="py-3 text-uppercase text-muted small fw-bold">Item</th>
+                        <th class="py-3 text-uppercase text-muted small fw-bold">Qty</th>
+                        <th class="py-3 text-uppercase text-muted small fw-bold">Total</th>
+                        <th class="py-3 text-uppercase text-muted small fw-bold">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for t in recent_transactions %}
                     <tr>
                         <td class="ps-4 text-muted small">{{ t.created_at.strftime('%H:%M') }}</td>
-                        <td class="fw-bold text-primary small">#{{ t.reference }}</td>
-                        <td>{{ t.product.name }}</td>
-                        <td class="fw-bold">{{ t.quantity }}</td>
+                        <td class="fw-bold text-gold small">#{{ t.reference }}</td>
+                        <td class="fw-bold text-dark">{{ t.product.name }}</td>
+                        <td><span class="badge bg-light text-dark border rounded-pill px-3">{{ t.quantity }}</span></td>
                         <td class="text-success fw-bold">Rp {{ "{:,.0f}".format(t.total_amount) }}</td>
                         <td>
-                            <span class="badge bg-success bg-opacity-10 text-success">Selesai</span>
+                            <span
+                                class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3">Selesai</span>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">Belum ada transaksi hari ini.</td>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                            Belum ada transaksi hari ini.
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -127,10 +223,163 @@
     </div>
 </div>
 
+<style>
+    .btn-white {
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+
+    .btn-white:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .text-gold {
+        color: #b78628 !important;
+    }
+
+    .letter-spacing-1 {
+        letter-spacing: 1px;
+    }
+
+    .font-sans {
+        font-family: 'Poppins', sans-serif !important;
+    }
+</style>
+
 <script>
     // Menampilkan tanggal hari ini (Format Indonesia: Senin, 13 Januari 2026)
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const dateStr = new Date().toLocaleDateString('id-ID', options);
     document.getElementById('currentDate').innerText = dateStr;
+
+    // Common Chart Options
+    const commonChartOptions = {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: {
+                    font: { family: "'Poppins', sans-serif", size: 12 },
+                    usePointStyle: true,
+                    boxWidth: 8
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                titleColor: '#333',
+                bodyColor: '#666',
+                borderColor: '#e0e0e0',
+                borderWidth: 1,
+                padding: 10,
+                displayColors: true,
+                callbacks: {
+                    labelColor: function (context) {
+                        return {
+                            borderColor: context.dataset.borderColor,
+                            backgroundColor: context.dataset.backgroundColor
+                        };
+                    }
+                }
+            }
+        }
+    };
+
+    // --- CHART SETUP ---
+    // 1. Sales Trend Chart
+    const salesCtx = document.getElementById('salesChart').getContext('2d');
+
+    // Create Gradient
+    let salesGradient = salesCtx.createLinearGradient(0, 0, 0, 400);
+    salesGradient.addColorStop(0, 'rgba(183, 134, 40, 0.2)'); // Gold Low Opacity
+    salesGradient.addColorStop(1, 'rgba(183, 134, 40, 0)');
+
+    new Chart(salesCtx, {
+        type: 'line',
+        data: {
+            labels: JSON.parse('{{ sales_dates | safe }}'),
+            datasets: [{
+                label: 'Pendapatan (Rp)',
+                data: JSON.parse('{{ sales_values | safe }}'),
+                borderColor: '#b78628', // Gold Border
+                backgroundColor: salesGradient,
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#b78628',
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            ...commonChartOptions,
+            maintainAspectRatio: false,
+            plugins: {
+                ...commonChartOptions.plugins,
+                legend: { display: false },
+                tooltip: {
+                    ...commonChartOptions.plugins.tooltip,
+                    callbacks: {
+                        label: function (context) {
+                            let label = context.dataset.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { display: true, borderDash: [5, 5], color: 'rgba(0,0,0,0.05)' },
+                    ticks: { callback: function (value) { return 'Rp ' + (value / 1000).toLocaleString('id-ID') + 'k'; } }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 2. Stock Distribution Chart
+    const stockCtx = document.getElementById('stockChart').getContext('2d');
+    const stockLabels = JSON.parse('{{ stock_labels | safe }}');
+    const stockValues = JSON.parse('{{ stock_values | safe }}');
+
+    // Fallback if empty
+    if (stockLabels.length === 0) {
+        stockLabels.push('Belum ada data');
+        stockValues.push(1);
+    }
+
+    new Chart(stockCtx, {
+        type: 'doughnut',
+        data: {
+            labels: stockLabels,
+            datasets: [{
+                data: stockValues,
+                backgroundColor: [
+                    '#b78628', // Gold
+                    '#2c3e50', // Navy
+                    '#27ae60', // Emerald
+                    '#c0392b', // Red
+                    '#7f8c8d', // Grey
+                    '#f39c12'  // Orange
+                ],
+                borderWidth: 0,
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            ...commonChartOptions,
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%',
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 20 } }
+            }
+        }
+    });
 </script>
 {% endblock %}

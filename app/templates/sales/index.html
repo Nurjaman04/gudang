@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark"><i class="bi bi-cart3 me-2 text-primary"></i>Penjualan (Sales)</h2>
+            <p class="text-muted">Kelola Sales Order dan Invoice.</p>
+        </div>
+        <a href="{{ url_for('sales.create_order') }}" class="btn btn-primary rounded-pill shadow fw-bold">
+            <i class="bi bi-plus-lg me-2"></i> Buat Order Baru
+        </a>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-body p-3">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-1">Draft / Pending</h6>
+                    <h3 class="fw-bold text-warning mb-0">{{ pending }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-body p-3">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-1">Belum Lunas (Unpaid)</h6>
+                    <h3 class="fw-bold text-danger mb-0">{{ unpaid }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 d-flex align-items-center">
+            <div class="d-flex gap-2 ms-auto">
+                <a href="{{ url_for('sales.return_list') }}" class="btn btn-outline-danger rounded-pill fw-bold">
+                    <i class="bi bi-arrow-counterclockwise me-2"></i> Retur
+                </a>
+                <a href="{{ url_for('sales.sales_report') }}" class="btn btn-outline-primary rounded-pill fw-bold">
+                    <i class="bi bi-graph-up me-2"></i> Laporan
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-2 d-flex gap-2">
+            <a href="{{ url_for('sales.index') }}"
+                class="btn btn-sm rounded-pill {{ 'btn-dark' if not request.args.get('status') else 'btn-light' }} px-3">Semua</a>
+            <a href="{{ url_for('sales.index', status='Draft') }}"
+                class="btn btn-sm rounded-pill {{ 'btn-secondary' if request.args.get('status') == 'Draft' else 'btn-light' }} px-3">Draft</a>
+            <a href="{{ url_for('sales.index', status='Confirmed') }}"
+                class="btn btn-sm rounded-pill {{ 'btn-primary' if request.args.get('status') == 'Confirmed' else 'btn-light' }} px-3">Confirmed</a>
+            <a href="{{ url_for('sales.index', status='Paid') }}"
+                class="btn btn-sm rounded-pill {{ 'btn-success' if request.args.get('status') == 'Paid' else 'btn-light' }} px-3">Paid</a>
+        </div>
+    </div>
+
+    <!-- Orders Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3">No. Order</th>
+                        <th class="py-3">Pelanggan</th>
+                        <th class="py-3">Tanggal</th>
+                        <th class="py-3 text-center">Status</th>
+                        <th class="py-3 text-end pe-4">Total</th>
+                        <th class="py-3 text-end pe-4">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for so in orders.items %}
+                    <tr>
+                        <td class="ps-4 fw-bold">
+                            <a href="{{ url_for('sales.view_order', id=so.id) }}"
+                                class="text-decoration-none text-dark">
+                                {{ so.order_number }}
+                            </a>
+                        </td>
+                        <td>{{ so.customer_rel.name if so.customer_rel else 'Umum' }}</td>
+                        <td>{{ so.date.strftime('%d/%m/%Y') }}</td>
+                        <td class="text-center">
+                            {% if so.status == 'Draft' %}<span class="badge bg-secondary">Draft</span>
+                            {% elif so.status == 'Confirmed' %}<span class="badge bg-primary">Confirmed</span>
+                            {% elif so.status == 'Paid' %}<span class="badge bg-success">Paid</span>
+                            {% else %}<span class="badge bg-light text-muted border">{{ so.status }}</span>{% endif %}
+                        </td>
+                        <td class="text-end pe-4 fw-bold">Rp {{ "{:,.0f}".format(so.grand_total) }}</td>
+                        <td class="text-end pe-4">
+                            <a href="{{ url_for('sales.view_order', id=so.id) }}"
+                                class="btn btn-sm btn-outline-primary rounded-circle">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">Belum ada Sales Order.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if orders.pages > 1 %}
+        <div class="card-footer bg-white py-3">
+            <nav>
+                <ul class="pagination justify-content-center mb-0">
+                    {% if orders.has_prev %}
+                    <li class="page-item"><a class="page-link rounded-circle mx-1"
+                            href="{{ url_for('sales.index', page=orders.prev_num) }}"><i
+                                class="bi bi-chevron-left"></i></a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link border-0">Hal {{ orders.page }}</span></li>
+                    {% if orders.has_next %}
+                    <li class="page-item"><a class="page-link rounded-circle mx-1"
+                            href="{{ url_for('sales.index', page=orders.next_num) }}"><i
+                                class="bi bi-chevron-right"></i></a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

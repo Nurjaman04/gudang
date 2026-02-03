@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-dark">Buat Sales Order Baru</h2>
+                <a href="{{ url_for('sales.index') }}" class="btn btn-light rounded-pill border">Batal</a>
+            </div>
+
+            <form action="{{ url_for('sales.create_order') }}" method="POST" id="soForm">
+                <!-- Header -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small text-muted">Pelanggan</label>
+                                <select class="form-select" name="customer_id" required>
+                                    <option value="">-- Pilih Pelanggan --</option>
+                                    {% for c in customers %}
+                                    <option value="{{ c.id }}">{{ c.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-muted">Tanggal Order</label>
+                                <input type="date" class="form-control" name="date" value="{{ today }}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small text-muted">Jatuh Tempo</label>
+                                <input type="date" class="form-control" name="due_date">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-bold small text-muted">Catatan</label>
+                                <textarea class="form-control" name="notes" rows="2"
+                                    placeholder="Catatan tambahan..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-white p-3 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">Item Pesanan</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0" id="itemsTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Produk</th>
+                                    <th style="width: 150px;">Harga Satuan</th>
+                                    <th style="width: 100px;">Qty</th>
+                                    <th style="width: 150px;" class="text-end pe-4">Subtotal</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsBody">
+                                <!-- JS will populate this -->
+                            </tbody>
+                            <tfoot class="bg-light">
+                                <tr>
+                                    <td colspan="5" class="ps-4 py-3">
+                                        <div class="d-flex gap-2">
+                                            <select class="form-select w-auto" id="productSelect">
+                                                <option value="">-- Pilih Produk --</option>
+                                                {% for p in products %}
+                                                <option value="{{ p.id }}" data-price="{{ p.price }}"
+                                                    data-name="{{ p.name }}">
+                                                    {{ p.name }} (Stok: {{ p.stock_quantity }})
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="button" class="btn btn-primary" onclick="addItem()">
+                                                <i class="bi bi-plus-lg"></i> Tambah Item
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th colspan="3" class="text-end py-3">TOTAL</th>
+                                    <th class="text-end pe-4 py-3 fs-5 fw-bold" id="grandTotal">Rp 0</th>
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Hidden Input for JSON -->
+                <input type="hidden" name="items_json" id="itemsJson">
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-success rounded-pill fw-bold px-5 btn-lg shadow"
+                        onclick="submitForm(event)">
+                        <i class="bi bi-check-lg me-2"></i> Simpan Order
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let items = [];
+
+    function addItem() {
+        const select = document.getElementById('productSelect');
+        const pId = select.value;
+        if (!pId) return;
+
+        const option = select.options[select.selectedIndex];
+        const pName = option.getAttribute('data-name');
+        const pPrice = parseFloat(option.getAttribute('data-price'));
+
+        // Check if exists
+        const existing = items.find(i => i.product_id === pId);
+        if (existing) {
+            existing.qty += 1;
+        } else {
+            items.push({
+                product_id: pId,
+                name: pName,
+                price: pPrice,
+                qty: 1
+            });
+        }
+        renderItems();
+        select.value = ""; // Reset
+    }
+
+    function removeItem(index) {
+        items.splice(index, 1);
+        renderItems();
+    }
+
+    function updateQty(index, newQty) {
+        if (newQty < 1) return;
+        items[index].qty = parseInt(newQty);
+        renderItems();
+    }
+
+    function renderItems() {
+        const tbody = document.getElementById('itemsBody');
+        tbody.innerHTML = '';
+        let total = 0;
+
+        items.forEach((item, index) => {
+            const subtotal = item.price * item.qty;
+            total += subtotal;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td class="ps-4 fw-bold text-dark">${item.name}</td>
+                    <td>Rp ${item.price.toLocaleString()}</td>
+                    <td>
+                        <input type="number" class="form-control form-control-sm text-center" style="width: 80px" 
+                               value="${item.qty}" min="1" onchange="updateQty(${index}, this.value)">
+                    </td>
+                    <td class="text-end pe-4 font-monospace">Rp ${subtotal.toLocaleString()}</td>
+                    <td class="text-center">
+                        <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="removeItem(${index})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('grandTotal').innerText = 'Rp ' + total.toLocaleString();
+    }
+
+    function submitForm(e) {
+        if (items.length === 0) {
+            e.preventDefault();
+            alert('Pilih minimal satu produk!');
+            return;
+        }
+        document.getElementById('itemsJson').value = JSON.stringify(items);
+    }
+</script>
+{% endblock %}

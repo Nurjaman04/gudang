@@ -7,7 +7,8 @@
     <title>Arcapada - Sistem Manajemen Gudang</title>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap"
         rel="stylesheet">
 
     <!-- Bootstrap CSS -->
@@ -20,6 +21,38 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        @media print {
+
+            .sidebar,
+            .top-header,
+            .btn,
+            .d-print-none {
+                display: none !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            /* Ensure Invoice fits */
+            .container {
+                max-width: 100% !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -52,40 +85,78 @@
             </li>
             {% endif %}
 
-            {% if session.role in ['admin', 'manager'] or 'inventory' in session.features %}
-            <li class="menu-category">Operasional</li>
+            {% if session.role in ['admin', 'manager'] or 'inventory' in session.features or 'warehouse' in
+            session.features %}
+            <li class="menu-category">Warehouse</li>
             <li>
                 <a href="{{ url_for('web.inventory') }}"
                     class="menu-link {% if request.endpoint == 'web.inventory' %}active{% endif %}">
                     <i class="bi bi-list-ul"></i>
-                    <span>Inventory</span>
+                    <span>Stok Inventory</span>
                 </a>
             </li>
             <li>
                 <a href="{{ url_for('web.receiving_page') }}"
                     class="menu-link {% if request.endpoint == 'web.receiving_page' %}active{% endif %}">
                     <i class="bi bi-truck"></i>
-                    <span>Penerimaan</span>
+                    <span>Penerimaan Barang</span>
                 </a>
             </li>
-            {% endif %}
-            {% if session.role in ['admin', 'manager'] or 'sales' in session.features %}
             <li>
-                <a href="{{ url_for('sales.sales_page') }}"
-                    class="menu-link {% if request.endpoint == 'sales.sales_page' %}active{% endif %}">
-                    <i class="bi bi-cart4"></i>
-                    <span>Penjualan</span>
+                <a href="{{ url_for('inventory.transfer_page') }}"
+                    class="menu-link {% if request.endpoint == 'inventory.transfer_page' %}active{% endif %}">
+                    <i class="bi bi-arrow-left-right"></i>
+                    <span>Transfer Antar Gudang</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('inventory.aging_report') }}"
+                    class="menu-link {% if request.endpoint == 'inventory.aging_report' %}active{% endif %}">
+                    <i class="bi bi-hourglass-split"></i>
+                    <span>Stock Ageing</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('warehouse.index') }}"
+                    class="menu-link {% if 'warehouse' in request.endpoint and request.endpoint != 'warehouse.locations' and request.endpoint != 'warehouse.tracking' %}active{% endif %}">
+                    <i class="bi bi-box2"></i>
+                    <span>Manajemen Gudang</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('warehouse.locations') }}"
+                    class="menu-link {% if request.endpoint == 'warehouse.locations' %}active{% endif %}">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>Lokasi Rak</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('warehouse.tracking') }}"
+                    class="menu-link {% if request.endpoint == 'warehouse.tracking' %}active{% endif %}">
+                    <i class="bi bi-qr-code-scan"></i>
+                    <span>Tracking Barang</span>
                 </a>
             </li>
             {% endif %}
 
-            {% if session.role in ['admin', 'manager'] or 'analytics' in session.features %}
-            <li class="menu-category">Laporan</li>
+            {% if session.role in ['admin', 'manager'] %}
+            <li class="menu-category">Finance</li>
             <li>
-                <a href="{{ url_for('web.laporan_final') }}"
-                    class="menu-link {% if request.endpoint == 'web.laporan_final' %}active{% endif %}">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span>Laporan Akhir</span>
+                <a href="{{ url_for('accounting.dashboard') }}"
+                    class="menu-link {% if 'accounting' in request.endpoint %}active{% endif %}">
+                    <i class="bi bi-cash-coin"></i>
+                    <span>Akuntansi</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% if session.role in ['admin', 'manager'] or 'sales' in session.features %}
+            <li class="menu-category">CRM</li>
+            <li>
+                <a href="{{ url_for('crm.dashboard') }}"
+                    class="menu-link {% if 'crm' in request.endpoint %}active{% endif %}">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Pelanggan (CRM)</span>
                 </a>
             </li>
             {% endif %}
@@ -130,7 +201,7 @@
                 <!-- Notifications -->
                 <!-- Notifications -->
                 <div class="dropdown">
-                    {% set notifs = notifications() %}
+                    {% set notifs = notifications %}
                     <a href="#" class="position-relative text-dark" data-bs-toggle="dropdown">
                         <i class="bi bi-bell fs-5"></i>
                         {% if notifs.count > 0 %}
@@ -146,7 +217,7 @@
                             <h6 class="dropdown-header text-uppercase small fw-bold">Notifikasi Sistem</h6>
                         </li>
                         {% if notifs.count > 0 %}
-                        {% for item in notifs.items %}
+                        {% for item in notifs.alerts %}
                         <li>
                             <a class="dropdown-item d-flex align-items-center py-2 border-bottom"
                                 href="{{ url_for('web.inventory') }}">

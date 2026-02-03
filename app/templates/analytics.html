@@ -3,191 +3,350 @@
 {% block content %}
 <div class="container pb-5">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5">
         <div>
-            <h2 class="fw-bold text-primary"><i class="bi bi-graph-up-arrow me-2"></i>Analitik Bisnis</h2>
-            <p class="text-muted">Pantau pertumbuhan omzet dan kesehatan inventory.</p>
+            <h2 class="fw-bold text-dark"><i class="bi bi-graph-up-arrow me-2 text-primary"></i>Sales Analytics Pro</h2>
+            <p class="text-muted mb-0">Deep dive into revenue, customer retention, and forecasting.</p>
         </div>
 
-        <div class="btn-group shadow-sm bg-white rounded-pill p-1" role="group">
-            <a href="{{ url_for('web.analytics', period='daily') }}"
-                class="btn btn-sm rounded-pill px-3 fw-bold {{ 'btn-primary' if current_period == 'daily' else 'btn-light text-muted' }}">
-                Hari Ini
+        <div class="d-flex align-items-center gap-3 mt-3 mt-md-0">
+            <a href="{{ url_for('web.export_analytics', period=current_period) }}"
+                class="btn btn-success rounded-pill px-3 fw-bold shadow-sm">
+                <i class="bi bi-file-earmark-excel me-2"></i>Export
             </a>
-            <a href="{{ url_for('web.analytics', period='weekly') }}"
-                class="btn btn-sm rounded-pill px-3 fw-bold {{ 'btn-primary' if current_period == 'weekly' else 'btn-light text-muted' }}">
-                Mingguan
-            </a>
-            <a href="{{ url_for('web.analytics', period='monthly') }}"
-                class="btn btn-sm rounded-pill px-3 fw-bold {{ 'btn-primary' if current_period == 'monthly' else 'btn-light text-muted' }}">
-                Bulanan
-            </a>
-            <a href="{{ url_for('web.analytics', period='yearly') }}"
-                class="btn btn-sm rounded-pill px-3 fw-bold {{ 'btn-primary' if current_period == 'yearly' else 'btn-light text-muted' }}">
-                Tahunan
-            </a>
+            <div class="btn-group shadow-sm bg-white rounded-pill p-1" role="group">
+                {% for p in ['daily', 'weekly', 'monthly', 'yearly'] %}
+                <a href="{{ url_for('web.analytics', period=p) }}"
+                    class="btn btn-sm rounded-pill px-3 fw-bold {{ 'btn-primary' if current_period == p else 'btn-light text-muted' }}">
+                    {{ p|capitalize }}
+                </a>
+                {% endfor %}
+            </div>
         </div>
     </div>
 
-    <!-- Recommendations / Alerts -->
-    {% if recommendations %}
-    <div class="mb-4">
-        {% for rec in recommendations %}
-        <div class="alert alert-{{ rec.type }} alert-dismissible fade show border-0 shadow-sm rounded-3 d-flex align-items-center"
-            role="alert">
-            <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
-            <div><strong>Insight:</strong> {{ rec.msg }}</div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
+    <!-- 1. Revenue & Sales Performance (KPI Cards) -->
     <div class="row g-4 mb-4">
-        <!-- ABC Analysis -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-header bg-white border-0 pt-4 px-4">
-                    <h5 class="fw-bold text-dark mb-0">Analisis ABC</h5>
-                    <small class="text-muted">Distribusi Nilai Produk</small>
-                </div>
                 <div class="card-body p-4">
-                    <div class="d-flex justify-content-between mb-3 text-center">
-                        <div class="p-2 bg-success bg-opacity-10 rounded-3 w-100 me-2">
-                            <h3 class="fw-bold text-success mb-0">{{ abc_data.A }}</h3>
-                            <small class="fw-bold text-muted" style="font-size: 0.7rem;">KELAS A</small>
-                        </div>
-                        <div class="p-2 bg-warning bg-opacity-10 rounded-3 w-100 me-2">
-                            <h3 class="fw-bold text-warning mb-0">{{ abc_data.B }}</h3>
-                            <small class="fw-bold text-muted" style="font-size: 0.7rem;">KELAS B</small>
-                        </div>
-                        <div class="p-2 bg-danger bg-opacity-10 rounded-3 w-100">
-                            <h3 class="fw-bold text-danger mb-0">{{ abc_data.C }}</h3>
-                            <small class="fw-bold text-muted" style="font-size: 0.7rem;">KELAS C</small>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted fw-bold text-uppercase">Total Revenue</small>
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2">
+                            <i class="bi bi-wallet2"></i>
                         </div>
                     </div>
-                    <p class="small text-muted mb-0">
-                        <strong>Kelas A:</strong> Produk prioritas tinggi (80% Omzet).<br>
-                        <strong>Kelas C:</strong> Produk prioritas rendah (5% Omzet).
-                    </p>
+                    <h3 class="fw-bold text-dark mb-0">Rp {{ "{:,.0f}".format(total_revenue).replace(',', '.') }}</h3>
+                    <small class="{{ 'text-success' if growth_rate >= 0 else 'text-danger' }}">
+                        <i class="bi {{ 'bi-arrow-up-right' if growth_rate >= 0 else 'bi-arrow-down-right' }}"></i>
+                        {{ "{:.1f}".format(growth_rate) }}% vs prev
+                    </small>
                 </div>
             </div>
         </div>
-
-        <!-- Inventory Health -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-header bg-white border-0 pt-4 px-4">
-                    <h5 class="fw-bold text-dark mb-0">Kesehatan Stok</h5>
-                    <small class="text-muted">Indikator Masalah Gudang</small>
-                </div>
-                <div class="card-body p-4 d-flex flex-column justify-content-center">
-                    <div class="d-flex align-items-center justify-content-between mb-3 p-3 bg-light rounded-4">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-danger text-white rounded-circle p-2 me-3"><i class="bi bi-battery-half"></i>
-                            </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold">Stok Menipis</h6>
-                                <small class="text-muted">Perlu Reorder</small>
-                            </div>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted fw-bold text-uppercase">Transactions</small>
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-2">
+                            <i class="bi bi-bag-check"></i>
                         </div>
-                        <h4 class="mb-0 fw-bold {{ 'text-danger' if low_stock_count > 0 else 'text-success' }}">{{
-                            low_stock_count }}</h4>
                     </div>
-
-                    <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-4">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-secondary text-white rounded-circle p-2 me-3"><i class="bi bi-archive"></i>
-                            </div>
-                            <div>
-                                <h6 class="mb-0 fw-bold">Dead Stock</h6>
-                                <small class="text-muted">>30 Hari Tanpa Jual</small>
-                            </div>
-                        </div>
-                        <h4 class="mb-0 fw-bold {{ 'text-warning' if dead_stock_count > 0 else 'text-success' }}">{{
-                            dead_stock_count }}</h4>
-                    </div>
+                    <h3 class="fw-bold text-dark mb-0">{{ total_transactions }}</h3>
+                    <small class="text-muted">Orders this period</small>
                 </div>
             </div>
         </div>
-
-        <!-- Top Products Chart -->
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-header bg-white border-0 pt-4 px-4">
-                    <h5 class="fw-bold text-dark mb-0">Top 5 Produk</h5>
-                </div>
-                <div class="card-body p-4 d-flex align-items-center justify-content-center">
-                    <div style="height: 200px; width: 100%;">
-                        <canvas id="topProductChart"></canvas>
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted fw-bold text-uppercase">Avg Order Value</small>
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-2">
+                            <i class="bi bi-calculator"></i>
+                        </div>
                     </div>
+                    <h3 class="fw-bold text-dark mb-0">Rp {{ "{:,.0f}".format(avg_order_value).replace(',', '.') }}</h3>
+                    <small class="text-muted">Per transaction</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted fw-bold text-uppercase">Retention Rate</small>
+                        <div class="bg-info bg-opacity-10 text-info rounded-circle p-2">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-0">{{ funnel.retention_rate }}%</h3>
+                    <small class="text-muted">Returning Customers</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Revenue Chart -->
-    <div class="card border-0 shadow-sm rounded-4">
+    <!-- 6 & 7. Time-based & Forecasting (Main Chart) -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="fw-bold text-dark mb-1">{{ chart_label }}</h5>
-                <div class="text-muted small">
-                    <i class="bi bi-calendar3 me-1"></i> Periode: <strong>{{ date_range_info }}</strong>
-                </div>
+                <h5 class="fw-bold text-dark mb-1">Revenue Trend & Forecast</h5>
+                <small class="text-muted">Historical data compared with AI-based prediction</small>
             </div>
-            <span class="badge bg-primary bg-opacity-10 text-primary py-2 px-3 rounded-pill">
-                <i class="bi bi-currency-dollar me-1"></i> Revenue Trend
-            </span>
+            <span class="badge bg-dark px-3 py-2 rounded-pill"><i class="bi bi-robot me-1"></i> LinReg Model</span>
         </div>
         <div class="card-body p-4">
             <div style="height: 350px;">
-                <canvas id="salesChart"></canvas>
+                <canvas id="mainChart"></canvas>
             </div>
         </div>
     </div>
+
+    <div class="row g-4 mb-4">
+        <!-- 4. Sales Funnel / Customer Retention -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-1">Customer Retention</h5>
+                    <small class="text-muted">Sales Funnel Proxy</small>
+                </div>
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded-3">
+                        <span class="fw-bold text-muted">Total Customers</span>
+                        <span class="fw-bold">{{ funnel.total_customers }}</span>
+                    </div>
+                    <div class="position-relative py-2">
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: 100%"></div>
+                        </div>
+                        <div class="text-center small text-muted mt-1">100%</div>
+                    </div>
+
+                    <div class="d-flex justify-content-center my-2"><i class="bi bi-arrow-down text-muted"></i></div>
+
+                    <div class="position-relative py-2">
+                        <div class="progress" style="height: 20px;">
+                            <div id="retention-bar" class="progress-bar bg-success" role="progressbar"
+                                aria-valuenow="{{ funnel.retention_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="text-center small text-muted mt-1">Repeat Buyers: {{ funnel.repeat }} ({{
+                            funnel.retention_rate }}%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Channel Performance -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-1">Channel Performance</h5>
+                    <small class="text-muted">Revenue by Branch</small>
+                </div>
+                <div class="card-body p-4 d-flex align-items-center justify-content-center">
+                    <canvas id="channelChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Top Customers -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-1">Top Customers</h5>
+                    <small class="text-muted">Highest Spenders</small>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for c in top_customers %}
+                        <li
+                            class="list-group-item d-flex justify-content-between align-items-center px-4 py-3 border-0">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                                    style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                    {{ c.customer[0] }}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold small text-dark">{{ c.customer }}</h6>
+                                    <small class="text-muted" style="font-size: 0.75rem;">{{ c.quantity }}
+                                        Transaksi</small>
+                                </div>
+                            </div>
+                            <span class="fw-bold text-success small">Rp {{
+                                "{:,.0f}".format(c.total_amount/1000).replace(',', '.') }}k</span>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-center text-muted py-4">No data available</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Product Performance -->
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-1">Top Performing Products</h5>
+                    <small class="text-muted">Highest Revenue Generators</small>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 border-0">Product</th>
+                                    <th class="border-0 text-center">Qty</th>
+                                    <th class="pe-4 border-0 text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in top_products %}
+                                <tr>
+                                    <td class="ps-4 border-0 fw-medium">{{ p.product_name }}</td>
+                                    <td class="border-0 text-center">
+                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill">{{
+                                            p.quantity }}</span>
+                                    </td>
+                                    <td class="pe-4 border-0 text-end fw-bold text-dark">
+                                        Rp {{ "{:,.0f}".format(p.total_amount).replace(',', '.') }}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">No data</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-1">Lowest Performing Products</h5>
+                    <small class="text-muted">High potential for dead stock</small>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4 border-0">Product</th>
+                                    <th class="border-0 text-center">Qty</th>
+                                    <th class="pe-4 border-0 text-end">Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in worst_products %}
+                                <tr>
+                                    <td class="ps-4 border-0 fw-medium text-muted">{{ p.product_name }}</td>
+                                    <td class="border-0 text-center">
+                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill">{{
+                                            p.quantity }}</span>
+                                    </td>
+                                    <td class="pe-4 border-0 text-end fw-medium text-muted">
+                                        Rp {{ "{:,.0f}".format(p.total_amount).replace(',', '.') }}
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">No data</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-    // --- GRAFIK 1: Penjualan ---
-    const ctx1 = document.getElementById('salesChart').getContext('2d');
-    const dateLabels = JSON.parse('{{ dates | safe }}');
-    const revenueData = JSON.parse('{{ revenues | safe }}');
+    // Set Retention Bar Width dynamically
+    document.getElementById('retention-bar').style.width = "{{ funnel.retention_rate }}%";
 
-    new Chart(ctx1, {
+    // Data Injections
+    const histDates = JSON.parse('{{ dates | safe }}');
+    const histValues = JSON.parse('{{ revenues | safe }}');
+    const ferDates = JSON.parse('{{ forecast_dates | safe }}');
+    const ferValues = JSON.parse('{{ forecast_values | safe }}');
+    const chanLabels = JSON.parse('{{ channel_labels | safe }}');
+    const chanValues = JSON.parse('{{ channel_values | safe }}');
+
+    // --- 1. MAIN CHART (Historical + Forecast) ---
+    const ctxMain = document.getElementById('mainChart').getContext('2d');
+
+    // Combine labels (History + Forecast)
+    // Note: If history is empty, this handles it gracefully
+    let allLabels = histDates.concat(ferDates);
+
+    // Prepare Data Arrays with matching lengths
+    // Historical needs 'null' padding for future dates
+    let histDataPadded = histValues.concat(new Array(ferDates.length).fill(null));
+
+    // Forecast needs 'null' padding for past dates (except bridging the last point)
+    // To make lines connect, the first point of forecast should ideally be the last point of history
+    let forecastDataPadded = new Array(histValues.length - 1).fill(null);
+    if (histValues.length > 0) {
+        forecastDataPadded.push(histValues[histValues.length - 1]); // Connection point
+    } else {
+        forecastDataPadded = [];
+    }
+    forecastDataPadded = forecastDataPadded.concat(ferValues);
+
+    new Chart(ctxMain, {
         type: 'line',
         data: {
-            labels: dateLabels,
-            datasets: [{
-                label: 'Pendapatan (Rp)',
-                data: revenueData,
-                data: revenueData,
-                borderColor: '#2c3e50', // Primary (Midnight Blue)
-                backgroundColor: (context) => {
-                    const ctx = context.chart.ctx;
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                    gradient.addColorStop(0, 'rgba(44, 62, 80, 0.4)');
-                    gradient.addColorStop(1, 'rgba(44, 62, 80, 0.0)');
-                    return gradient;
+            labels: allLabels,
+            datasets: [
+                {
+                    label: 'Actual Revenue',
+                    data: histDataPadded,
+                    borderColor: '#2c3e50',
+                    backgroundColor: 'rgba(44, 62, 80, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#fff'
                 },
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 3,
-                pointBackgroundColor: '#fff',
-                pointBorderColor: '#2c3e50'
-            }]
+                {
+                    label: 'Forecast (AI)',
+                    data: forecastDataPadded,
+                    borderColor: '#e67e22',
+                    borderDash: [5, 5],
+                    backgroundColor: 'rgba(230, 126, 34, 0.05)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointStyle: 'rectRot'
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: { position: 'top' },
                 tooltip: {
+                    mode: 'index',
+                    intersect: false,
                     callbacks: {
                         label: function (context) {
-                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.raw);
+                            return ' ' + context.dataset.label + ': Rp ' + new Intl.NumberFormat('id-ID').format(context.raw || 0);
                         }
                     }
                 }
@@ -196,47 +355,51 @@
                 y: {
                     beginAtZero: true,
                     grid: { borderDash: [5, 5] },
-                    ticks: { callback: function (value) { return 'Rp ' + (value / 1000).toLocaleString('id-ID') + 'k'; } }
+                    ticks: {
+                        callback: function (value) {
+                            return 'Rp ' + (value / 1000).toLocaleString('id-ID') + 'k';
+                        }
+                    }
                 },
                 x: { grid: { display: false } }
             }
         }
     });
 
-    // --- GRAFIK 2: Produk Terlaris ---
-    const ctx2 = document.getElementById('topProductChart').getContext('2d');
-    const productNames = JSON.parse('{{ top_names | safe }}');
-    const productQtys = JSON.parse('{{ top_qtys | safe }}');
-
-    new Chart(ctx2, {
-        type: 'doughnut',
-        data: {
-            labels: productNames,
-            datasets: [{
-                data: productQtys,
-                // Light Luxury Scale: Gold, Forest, Slate, Terra, Navyish-Grey
-                backgroundColor: ['#b78628', '#2e7d32', '#6c757d', '#d84315', '#37474f'],
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function (context) {
-                            let label = context.label || '';
-                            let value = context.parsed || 0;
-                            return label + ': ' + value + ' Unit';
+    // --- 2. CHANNEL CHART ---
+    const ctxChan = document.getElementById('channelChart').getContext('2d');
+    if (chanLabels.length > 0) {
+        new Chart(ctxChan, {
+            type: 'doughnut',
+            data: {
+                labels: chanLabels,
+                datasets: [{
+                    data: chanValues,
+                    backgroundColor: ['#2c3e50', '#c5a059', '#27ae60', '#c0392b', '#7f8c8d'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let val = new Intl.NumberFormat('id-ID').format(context.raw);
+                                return ' ' + context.label + ': Rp ' + val;
+                            }
                         }
                     }
-                }
-            },
-            cutout: '70%'
-        }
-    });
+                },
+                cutout: '65%'
+            }
+        });
+    } else {
+        // Fallback if no channel data
+        ctxChan.font = "14px Arial";
+        ctxChan.fillText("No channel data", 10, 50);
+    }
 </script>
 {% endblock %}

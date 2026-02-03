@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark"><i class="bi bi-box2 me-2 text-primary"></i>Warehouse Operations</h2>
+            <p class="text-muted">Kelola aktivitas gudang dari picking hingga pengiriman.</p>
+        </div>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white"
+                style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="card-body p-4 position-relative overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-start z-1 position-relative">
+                        <div>
+                            <h6 class="text-white text-opacity-75 text-uppercase fw-bold mb-2">Perlu Dipick (Picking)
+                            </h6>
+                            <h2 class="display-4 fw-bold mb-0">{{ pending_picks }}</h2>
+                            <span class="badge bg-white bg-opacity-25 mt-2">Pesanan Baru</span>
+                        </div>
+                        <div class="bg-white bg-opacity-25 rounded-circle p-3">
+                            <i class="bi bi-basket2 fs-2"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('warehouse.picking_list') }}"
+                        class="btn btn-light text-primary fw-bold rounded-pill px-4 mt-4 stretched-link">
+                        Mulai Picking <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                    <!-- Decor -->
+                    <i class="bi bi-basket2 position-absolute"
+                        style="font-size: 10rem; right: -20px; bottom: -40px; opacity: 0.1;"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-success text-white"
+                style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="card-body p-4 position-relative overflow-hidden">
+                    <div class="d-flex justify-content-between align-items-start z-1 position-relative">
+                        <div>
+                            <h6 class="text-white text-opacity-75 text-uppercase fw-bold mb-2">Siap Dipack (Packing)
+                            </h6>
+                            <h2 class="display-4 fw-bold mb-0">{{ pending_packs }}</h2>
+                            <span class="badge bg-white bg-opacity-25 mt-2">Menunggu Packing</span>
+                        </div>
+                        <div class="bg-white bg-opacity-25 rounded-circle p-3">
+                            <i class="bi bi-box-seam fs-2"></i>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('warehouse.packing_list') }}"
+                        class="btn btn-light text-success fw-bold rounded-pill px-4 mt-4 stretched-link">
+                        Mulai Packing <i class="bi bi-arrow-right ms-2"></i>
+                    </a>
+                    <!-- Decor -->
+                    <i class="bi bi-box-seam position-absolute"
+                        style="font-size: 10rem; right: -20px; bottom: -40px; opacity: 0.1;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <h5 class="fw-bold mb-3">Menu Cepat</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <a href="{{ url_for('warehouse.locations') }}"
+                class="card border-0 shadow-sm p-3 rounded-4 text-decoration-none h-100 hover-shadow transition-all">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
+                        <i class="bi bi-geo-alt fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Lokasi Rak</h6>
+                        <small class="text-muted">Atur lokasi penyimpanan per produk</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('warehouse.tracking') }}"
+                class="card border-0 shadow-sm p-3 rounded-4 text-decoration-none h-100 hover-shadow transition-all">
+                <div class="d-flex align-items-center">
+                    <div class="bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
+                        <i class="bi bi-search fs-4"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Lacak Barang</h6>
+                        <small class="text-muted">Cari riwayat pergerakan SKU</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+    }
+
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}

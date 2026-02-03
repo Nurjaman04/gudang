@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Kartu Stok</h2>
+            <p class="text-muted mb-0">Riwayat pergerakan stok detail per barang.</p>
+        </div>
+        <a href="{{ url_for('web.inventory') }}" class="btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar Barang
+        </a>
+    </div>
+
+    <!-- Product Info -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="fw-bold">{{ product.name }}</h5>
+                    <div class="text-muted mb-2">SKU: {{ product.sku }}</div>
+                    <span class="badge bg-light text-dark border">{{ product.category }}</span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h1 class="fw-bold text-primary mb-0">{{ product.stock_quantity }}</h1>
+                    <div class="text-muted small">Total Stok Tersedia ({{ product.unit or 'pcs' }})</div>
+                    {% if product.stock_quantity <= product.min_stock_threshold %} <div class="text-danger small mt-1">
+                        <i class="bi bi-exclamation-triangle"></i> Di bawah minimum ({{ product.min_stock_threshold }})
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Stock per Warehouse -->
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white p-3">
+                <h6 class="mb-0 fw-bold">Lokasi Stok</h6>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    {% for s in stocks %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">{{ s.warehouse.name }}</div>
+                            <small class="text-muted">{{ s.location_rack or '-' }}</small>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">{{ s.quantity }}</span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item text-center text-muted py-4">
+                        Stok belum teralokasi ke gudang spesifik (Global: {{ product.stock_quantity }})
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Movement History -->
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+            <div class="card-header bg-white p-3 border-bottom">
+                <h6 class="mb-0 fw-bold">Riwayat Transaksi (100 Terakhir)</h6>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Tanggal</th>
+                            <th>Tipe</th>
+                            <th>Referensi</th>
+                            <th class="text-end pe-4">Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in transactions %}
+                        <tr>
+                            <td class="ps-4">{{ t.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                {% if t.transaction_type == 'IN' %}
+                                <span class="badge bg-success-subtle text-success">MASUK</span>
+                                {% else %}
+                                <span class="badge bg-danger-subtle text-danger">KELUAR</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="fw-bold">{{ t.reference or '-' }}</div>
+                                <div class="text-muted">{{ t.branch_name or t.supplier or '' }}</div>
+                            </td>
+                            <td
+                                class="text-end pe-4 fw-bold {{ 'text-success' if t.transaction_type == 'IN' else 'text-danger' }}">
+                                {{ '+' if t.transaction_type == 'IN' else '-' }} {{ t.quantity }}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">Belum ada transaksi.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

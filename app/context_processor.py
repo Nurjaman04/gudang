@@ -15,7 +15,7 @@ def inject_notifications():
         
         return {
             'count': len(low_stock_items),
-            'items': low_stock_items
+            'alerts': low_stock_items
         }
 
     return dict(notifications=get_notifications())

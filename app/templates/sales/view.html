@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Toolbar -->
+            <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+                <a href="{{ url_for('sales.index') }}" class="btn btn-outline-secondary rounded-pill">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali
+                </a>
+                <div class="d-flex gap-2">
+                    <button onclick="window.print()" class="btn btn-outline-dark rounded-pill">
+                        <i class="bi bi-printer me-2"></i> Cetak
+                    </button>
+                    {% if order.status == 'Draft' %}
+                    <form action="{{ url_for('sales.confirm_order', id=order.id) }}" method="POST"
+                        onsubmit="return confirm('Konfirmasi order ini? Stok akan dipotong.')">
+                        <button type="submit" class="btn btn-primary rounded-pill fw-bold px-4">
+                            Konfirmasi Order
+                        </button>
+                    </form>
+                    {% elif order.status == 'Confirmed' %}
+                    <form action="{{ url_for('sales.mark_paid', id=order.id) }}" method="POST">
+                        <button type="submit" class="btn btn-success rounded-pill fw-bold px-4">
+                            Tandai Lunas
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Invoice Card -->
+            <div class="card border-0 shadow rounded-0 p-5 bg-white" id="invoiceArea">
+                <!-- Header -->
+                <div class="d-flex justify-content-between mb-5 border-bottom pb-4">
+                    <div>
+                        <h1 class="fw-bold text-dark mb-0">INVOICE</h1>
+                        <p class="text-muted small mb-0">{{ order.order_number }}</p>
+                    </div>
+                    <div class="text-end">
+                        <h4 class="fw-bold text-primary">Warehouse App</h4>
+                        <p class="small text-muted mb-0">Jalan Demo No. 123, Jakarta</p>
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="row mb-5">
+                    <div class="col-6">
+                        <h6 class="text-uppercase text-muted small fw-bold mb-2">Ditagihkan Kepada:</h6>
+                        <h5 class="fw-bold mb-1">{{ order.customer_rel.name }}</h5>
+                        <p class="mb-0 text-muted">{{ order.customer_rel.address or 'Alamat tidak tersedia' }}</p>
+                        <p class="text-muted">{{ order.customer_rel.phone }}</p>
+                    </div>
+                    <div class="col-6 text-end">
+                        <div class="mb-2">
+                            <span class="text-muted small fw-bold me-2">TANGGAL:</span>
+                            <span class="fw-bold">{{ order.date.strftime('%d %B %Y') }}</span>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted small fw-bold me-2">JATUH TEMPO:</span>
+                            <span class="fw-bold">{{ order.due_date.strftime('%d %B %Y') if order.due_date else '-'
+                                }}</span>
+                        </div>
+                        <div class="mt-3">
+                            <span class="badge rounded-pill px-3 py-2 fs-6 
+                                {{ 'bg-secondary' if order.status == 'Draft' else 
+                                   'bg-primary' if order.status == 'Confirmed' else 
+                                   'bg-success' }}">
+                                {{ order.status }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <table class="table mb-4">
+                    <thead class="bg-light text-dark">
+                        <tr>
+                            <th class="py-3 ps-3">Deskripsi Produk</th>
+                            <th class="py-3 text-center">Qty</th>
+                            <th class="py-3 text-end">Harga Satuan</th>
+                            <th class="py-3 text-end pe-3">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items %}
+                        <tr>
+                            <td class="ps-3 py-3">
+                                <span class="fw-bold text-dark">{{ item.product.name }}</span><br>
+                                <small class="text-muted">{{ item.product.sku }}</small>
+                            </td>
+                            <td class="text-center py-3">{{ item.quantity }}</td>
+                            <td class="text-end py-3">Rp {{ "{:,.0f}".format(item.price) }}</td>
+                            <td class="text-end pe-3 py-3 fw-bold">Rp {{ "{:,.0f}".format(item.subtotal) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Total -->
+                <div class="row justify-content-end mb-5">
+                    <div class="col-5">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal</span>
+                            <span class="fw-bold">Rp {{ "{:,.0f}".format(order.total_amount) }}</span>
+                        </div>
+                        {% if order.tax_amount > 0 %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Pajak</span>
+                            <span>Rp {{ "{:,.0f}".format(order.tax_amount) }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="d-flex justify-content-between border-top pt-3 mt-3">
+                            <span class="fs-5 fw-bold">Grand Total</span>
+                            <span class="fs-4 fw-bold text-primary">Rp {{ "{:,.0f}".format(order.grand_total) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                {% if order.notes %}
+                <div class="bg-light p-3 rounded text-muted small mb-5">
+                    <strong>Catatan:</strong><br>
+                    {{ order.notes }}
+                </div>
+                {% endif %}
+
+                <div class="text-center text-muted small mt-auto pt-5 border-top">
+                    Terima kasih atas kepercayaan Anda berbisnis dengan kami.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

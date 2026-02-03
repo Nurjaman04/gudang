@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark"><i class="bi bi-person-lines-fill me-2 text-primary"></i>Daftar Pelanggan</h2>
+            <p class="text-muted">Kelola database pelanggan Anda.</p>
+        </div>
+        <button class="btn btn-primary rounded-pill shadow fw-bold" data-bs-toggle="modal"
+            data-bs-target="#addCustomerModal">
+            <i class="bi bi-person-plus-fill me-2"></i> Tambah Pelanggan
+        </button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-header bg-white p-3 border-bottom">
+            <form action="{{ url_for('crm.customer_list') }}" method="GET">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="q" class="form-control border-start-0 ps-0"
+                        placeholder="Cari nama atau email..." value="{{ query }}">
+                    <button class="btn btn-primary" type="submit">Cari</button>
+                </div>
+            </form>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3">Nama Lengkap</th>
+                        <th class="py-3">Info Kontak</th>
+                        <th class="py-3">Tipe</th>
+                        <th class="text-end pe-4 py-3">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in customers.items %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">{{ c.name }}</div>
+                            <small class="text-muted">ID: #{{ c.id }}</small>
+                        </td>
+                        <td>
+                            {% if c.email %}<div class="small"><i class="bi bi-envelope me-1 text-muted"></i> {{ c.email
+                                }}</div>{% endif %}
+                            {% if c.phone %}<div class="small"><i class="bi bi-whatsapp me-1 text-muted"></i> {{ c.phone
+                                }}</div>{% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">{{ c.type }}</span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{{ url_for('crm.customer_detail', id=c.id) }}"
+                                class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                                Detail <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">Data pelanggan tidak ditemukan.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if customers.pages > 1 %}
+        <div class="card-footer bg-white py-3">
+            <nav>
+                <ul class="pagination justify-content-center mb-0">
+                    {% if customers.has_prev %}
+                    <li class="page-item"><a class="page-link rounded-circle mx-1"
+                            href="{{ url_for('crm.customer_list', page=customers.prev_num, q=query) }}"><i
+                                class="bi bi-chevron-left"></i></a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link border-0">Hal {{ customers.page }} dari {{
+                            customers.pages }}</span></li>
+                    {% if customers.has_next %}
+                    <li class="page-item"><a class="page-link rounded-circle mx-1"
+                            href="{{ url_for('crm.customer_list', page=customers.next_num, q=query) }}"><i
+                                class="bi bi-chevron-right"></i></a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Add Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">Tambah Pelanggan Baru</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('crm.add_customer') }}" method="POST">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Nama Lengkap</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col">
+                            <label class="form-label fw-bold small text-muted">Email</label>
+                            <input type="email" class="form-control" name="email">
+                        </div>
+                        <div class="col">
+                            <label class="form-label fw-bold small text-muted">No. HP / WA</label>
+                            <input type="text" class="form-control" name="phone">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Tipe Pelanggan</label>
+                        <select class="form-select" name="type">
+                            <option value="Personal">Personal (Perorangan)</option>
+                            <option value="Business">Business (Perusahaan)</option>
+                            <option value="Reseller">Reseller</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

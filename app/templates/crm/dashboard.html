@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark"><i class="bi bi-people-fill me-2 text-primary"></i>CRM Dashboard</h2>
+            <p class="text-muted">Kelola data pelanggan dan interaksi penjualan.</p>
+        </div>
+        <a href="{{ url_for('crm.customer_list') }}" class="btn btn-primary rounded-pill shadow-sm fw-bold">
+            <i class="bi bi-list-ul me-2"></i> Daftar Pelanggan
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                        <i class="bi bi-person-lines-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted text-uppercase small fw-bold mb-1">Total Pelanggan</h6>
+                        <h2 class="fw-bold mb-0 text-dark">{{ total_customers }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
+                        <i class="bi bi-person-plus-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted text-uppercase small fw-bold mb-1">Pelanggan Baru (Bulan Ini)</h6>
+                        <h2 class="fw-bold mb-0 text-dark">{{ new_this_month }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
+                        <i class="bi bi-telephone-outbound-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted text-uppercase small fw-bold mb-1">Perlu Follow-up</h6>
+                        <h2 class="fw-bold mb-0 text-dark">{{ pending_followups }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Top Customers -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white p-3 border-bottom">
+                    <h5 class="mb-0 fw-bold">Pelanggan Setia (Top Spender)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Nama</th>
+                                <th class="text-end pe-4">Total Belanja</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c, total in top_customers %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">{{ c.name }}</div>
+                                    <small class="text-muted">{{ c.type }}</small>
+                                </td>
+                                <td class="text-end pe-4 text-success fw-bold">Rp {{ "{:,.0f}".format(total) }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center py-4 text-muted">Belum ada data transaksi.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Interactions -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white p-3 border-bottom">
+                    <h5 class="mb-0 fw-bold">Interaksi Terakhir</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for i in recent_interactions %}
+                        <div class="list-group-item p-3">
+                            <div class="d-flex w-100 justify-content-between mb-1">
+                                <h6 class="mb-1 fw-bold">{{ i.customer.name }}</h6>
+                                <small class="text-muted">{{ i.date.strftime('%d %b %H:%M') }}</small>
+                            </div>
+                            <p class="mb-1 small">{{ i.notes }}</p>
+                            <span class="badge bg-light text-secondary border">{{ i.type }}</span>
+                            {% if i.status == 'Open' and i.follow_up_date %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i> Follow-up: {{
+                                i.follow_up_date.strftime('%d %b') }}</span>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="p-4 text-center text-muted">Belum ada interaksi tercatat.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

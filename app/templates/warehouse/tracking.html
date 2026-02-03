@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold"><i class="bi bi-qr-code-scan me-2 text-info"></i>Tracking Barang</h2>
+                <p class="text-muted">Cari riwayat pergerakan barang (SKU) secara lengkap.</p>
+            </div>
+
+            <!-- Search -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-5">
+                <form action="{{ url_for('warehouse.tracking') }}" method="GET">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white border-0 ps-4"><i
+                                class="bi bi-search text-muted"></i></span>
+                        <input type="text" name="q" class="form-control border-0 bg-light rounded-pill"
+                            placeholder="Masukkan SKU atau Nama Barang..." value="{{ request.args.get('q', '') }}"
+                            autofocus>
+                        <button class="btn btn-info text-white fw-bold rounded-pill px-5 ms-2"
+                            type="submit">Lacak</button>
+                    </div>
+                </form>
+            </div>
+
+            {% if product %}
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary text-white rounded-3 p-3 me-3">
+                            <h3 class="fw-bold mb-0">{{ product.sku }}</h3>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0">{{ product.name }}</h4>
+                            <p class="text-muted mb-0">Lokasi: <span class="badge bg-warning text-dark">{{
+                                    product.rack_location }}</span> | Stok: {{ product.stock_quantity }}</p>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold border-bottom pb-2 mb-3">Linimasa Pergerakan</h5>
+                    <div class="timeline">
+                        {% for t in history %}
+                        <div class="timeline-item d-flex mb-3">
+                            <div class="me-3 d-flex flex-column align-items-center">
+                                <div class="rounded-circle p-2 d-flex align-items-center justify-content-center text-white 
+                                    {% if t.transaction_type == 'IN' %}bg-success
+                                    {% elif t.transaction_type == 'OUT' %}bg-danger
+                                    {% elif 'TRANSFER' in t.transaction_type %}bg-warning
+                                    {% else %}bg-secondary{% endif %}" style="width: 40px; height: 40px;">
+                                    {% if t.transaction_type == 'IN' %}<i class="bi bi-arrow-down"></i>
+                                    {% elif t.transaction_type == 'OUT' %}<i class="bi bi-arrow-up"></i>
+                                    {% else %}<i class="bi bi-arrow-left-right"></i>{% endif %}
+                                </div>
+                                {% if not loop.last %}<div class="h-100 border-start my-2" style="width: 2px;"></div>{%
+                                endif %}
+                            </div>
+                            <div class="card border-0 bg-light w-100 p-3 rounded-3">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="fw-bold mb-1">
+                                        {% if t.transaction_type == 'IN' %}Barang Masuk
+                                        {% elif t.transaction_type == 'OUT' %}Barang Keluar (Penjualan)
+                                        {% else %}{{ t.transaction_type }}{% endif %}
+                                    </h6>
+                                    <small class="text-muted">{{ t.created_at.strftime('%d %b %Y, %H:%M') }}</small>
+                                </div>
+                                <p class="mb-0 small text-muted">
+                                    Jumlah: <strong>{{ t.quantity }}</strong> |
+                                    Ref: {{ t.reference or '-' }} |
+                                    {% if t.transaction_type == 'OUT' %}Customer: {{ t.supplier or 'Umum' }}
+                                    {% elif t.transaction_type == 'IN' %}Supplier: {{ t.supplier or '-' }}
+                                    {% endif %}
+                                </p>
+                                <div class="mt-2">
+                                    <span class="badge bg-white border text-secondary status-badge">{{
+                                        t.fulfillment_status or 'Completed' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-center text-muted">Belum ada riwayat transaksi.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

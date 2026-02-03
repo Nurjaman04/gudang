@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-success"><i class="bi bi-box-seam me-2"></i>Packing & Shipping</h2>
+            <p class="text-muted">Proses packing dan pengiriman barang yang sudah dipick.</p>
+        </div>
+        <a href="{{ url_for('warehouse.index') }}" class="btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3">No. Invoice</th>
+                            <th class="py-3">Customer</th>
+                            <th class="py-3">Produk</th>
+                            <th class="text-center py-3">Qty</th>
+                            <th class="text-end pe-4 py-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr>
+                            <td class="ps-4 fw-bold">#{{ task.reference or '-' }}</td>
+                            <td>{{ task.supplier or 'Umum' }}</td>
+                            <td>
+                                {{ task.product.name }}
+                                <span class="badge bg-light text-muted border ms-2">Lokasi: {{
+                                    task.product.rack_location }}</span>
+                            </td>
+                            <td class="text-center fw-bold">{{ task.quantity }}</td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a href="{{ url_for('warehouse.update_status', trx_id=task.id, status='packed') }}"
+                                        class="btn btn-success btn-sm fw-bold px-3" title="Tandai Packed">
+                                        <i class="bi bi-box-seam me-1"></i> Pack
+                                    </a>
+                                    <a href="{{ url_for('warehouse.update_status', trx_id=task.id, status='shipped') }}"
+                                        class="btn btn-dark btn-sm fw-bold px-3" title="Tandai Shipped">
+                                        <i class="bi bi-truck me-1"></i> Ship
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-check-circle fs-1 d-block mb-3 text-success"></i>
+                                Tidak ada antrian packing.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark"><i class="bi bi-geo-alt me-2 text-warning"></i>Manajemen Lokasi Rak</h2>
+            <p class="text-muted">Petakan stok produk ke lokasi rak yang spesifik.</p>
+        </div>
+        <a href="{{ url_for('warehouse.index') }}" class="btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3">Kode SKU</th>
+                            <th class="py-3">Nama Produk</th>
+                            <th class="py-3">Kategori</th>
+                            <th class="py-3">Stok</th>
+                            <th class="py-3" style="width: 300px;">Lokasi Rak Aktif</th>
+                            <th class="text-end pe-4 py-3">Update</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in products %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-muted">{{ p.sku }}</td>
+                            <td class="fw-bold">{{ p.name }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ p.category }}</span></td>
+                            <td>{{ p.stock_quantity }}</td>
+                            <td>
+                                <form action="{{ url_for('warehouse.locations') }}" method="POST" class="d-flex">
+                                    <input type="hidden" name="product_id" value="{{ p.id }}">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white"><i
+                                                class="bi bi-geo-alt text-danger"></i></span>
+                                        <input type="text" class="form-control" name="rack_location"
+                                            value="{{ p.rack_location }}" placeholder="Contoh: Rak A-01">
+                                    </div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">Simpan</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

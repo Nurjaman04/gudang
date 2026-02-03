@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark"><i class="bi bi-graph-up-arrow me-2 text-success"></i>Laporan Penjualan</h2>
+            <p class="text-muted">Analisis performa penjualan Anda.</p>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-outline-secondary btn-sm">Bulan Ini</button>
+            <button class="btn btn-outline-secondary btn-sm">Tahun Ini</button>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white"
+                style="background: linear-gradient(135deg, #FF9966 0%, #FF5E62 100%);">
+                <div class="card-body p-4">
+                    <h6 class="text-uppercase fw-bold text-white-50">Total Omset (Gross)</h6>
+                    <h2 class="fw-bold mb-0">Rp {{ "{:,.0f}".format(total_sales) }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white"
+                style="background: linear-gradient(135deg, #56CCF2 0%, #2F80ED 100%);">
+                <div class="card-body p-4">
+                    <h6 class="text-uppercase fw-bold text-white-50">Total Transaksi</h6>
+                    <h2 class="fw-bold mb-0">{{ total_orders }} <span class="fs-6 fw-normal">Order</span></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-body p-4">
+                    <h6 class="text-uppercase fw-bold text-muted">Rata-rata Order</h6>
+                    <h2 class="fw-bold mb-0 text-dark">Rp {{ "{:,.0f}".format(avg_order_value) }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Monthly Trend -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white p-3 border-bottom">
+                    <h5 class="mb-0 fw-bold">Penjualan Terakhir</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Tanggal</th>
+                                <th>No. Order</th>
+                                <th>Pelanggan</th>
+                                <th class="text-end pe-4">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for so in recent_sales %}
+                            <tr>
+                                <td class="ps-4">{{ so.date.strftime('%d %b %Y') }}</td>
+                                <td><a href="{{ url_for('sales.view_order', id=so.id) }}"
+                                        class="fw-bold text-decoration-none">{{ so.order_number }}</a></td>
+                                <td>{{ so.customer_rel.name }}</td>
+                                <td class="text-end pe-4">Rp {{ "{:,.0f}".format(so.grand_total) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white p-3 border-bottom">
+                    <h5 class="mb-0 fw-bold">Produk Terlaris</h5>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for p in top_products %}
+                        <li class="list-group-item p-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">{{ p.name }}</div>
+                                <small class="text-muted">{{ p.sold_count }} terjual</small>
+                            </div>
+                            <span class="badge bg-success rounded-pill">Rp {{ "{:,.0f}".format(p.subtotal_sum) }}</span>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item text-center text-muted py-4">Belum ada data.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

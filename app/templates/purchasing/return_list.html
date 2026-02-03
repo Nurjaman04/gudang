@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h2 class="fw-bold hero-title text-dark display-5">Retur Pembelian</h2>
+            <p class="text-muted lead fs-6">Riwayat pengembalian barang ke supplier.</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-5 glass-panel overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light bg-opacity-50 text-uppercase text-muted small">
+                        <tr>
+                            <th class="ps-4 py-3 border-0">No. Retur</th>
+                            <th class="py-3 border-0">Asal PO</th>
+                            <th class="py-3 border-0">Tanggal</th>
+                            <th class="py-3 border-0">Alasan</th>
+                            <th class="py-3 border-0 text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        {% for ret in returns %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-dark">{{ ret.return_number }}</td>
+                            <td>
+                                <a href="{{ url_for('purchasing.view_po', id=ret.purchase_order_id) }}"
+                                    class="text-decoration-none fw-bold text-info">
+                                    {{ ret.purchase_order.po_number }}
+                                </a>
+                            </td>
+                            <td class="text-muted">{{ ret.date.strftime('%d %b %Y') }}</td>
+                            <td>{{ ret.reason }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-secondary rounded-pill px-3">{{ ret.status }}</span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">Belum ada data retur.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

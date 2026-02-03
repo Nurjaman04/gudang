@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark"><i class="bi bi-clipboard-check me-2 text-primary"></i>Stock Opname</h2>
+            <p class="text-muted">Lakukan penyesuaian stok (Pencil Count) secara massal.</p>
+        </div>
+        <a href="{{ url_for('web.inventory') }}" class="btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
+
+    <!-- Info Box -->
+    <div class="alert alert-info border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
+        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+        <div>
+            <strong>Instruksi:</strong> Masukkan jumlah stok fisik (Real) <strong>HANYA</strong> pada produk yang
+            selisih. Produk yang dikosongkan tidak akan diubah stoknya.
+        </div>
+    </div>
+
+    <form action="{{ url_for('inventory.process_opname') }}" method="POST">
+        <!-- Header Controls -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-muted">REF. OPNAME</label>
+                        <input type="text" class="form-control fw-bold" name="reference" value="{{ ref_number }}"
+                            readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-muted">LOKASI GUDANG (CATATAN)</label>
+                        <select class="form-select" name="notes">
+                            <option value="Gudang Utama" selected>Gudang Utama (Main)</option>
+                            {% for w in warehouses %}
+                            <option value="{{ w.name }}">{{ w.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold"
+                            onclick="return confirm('Apakah Anda yakin ingin memproses penyesuaian stok ini?')">
+                            <i class="bi bi-save me-2"></i> Simpan Hasil Opname
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product List -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="card-header bg-white p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">Daftar Produk</h5>
+                <div>
+                    <input type="text" id="searchBox" class="form-control form-control-sm"
+                        placeholder="Cari nama barang...">
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0" id="opnameTable">
+                        <thead class="bg-light sticky-top" style="z-index: 10;">
+                            <tr>
+                                <th class="ps-4 py-3">Lokasi Rak</th>
+                                <th class="py-3">Produk</th>
+                                <th class="text-center py-3 bg-light border-start">Stok Sistem</th>
+                                <th class="text-center py-3 bg-white border-start border-end" style="width: 150px;">Stok
+                                    Fisik (Real)</th>
+                                <th class="text-center py-3" style="width: 100px;">Satuan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in products %}
+                            <tr>
+                                <td class="ps-4 text-muted small"><i class="bi bi-geo-alt me-1"></i> {{ p.rack_location
+                                    }}</td>
+                                <td>
+                                    <div class="fw-bold text-dark item-name">{{ p.name }}</div>
+                                    <small class="text-muted item-sku">{{ p.sku }}</small>
+                                </td>
+                                <td class="text-center border-start bg-light fw-bold text-dark">
+                                    {{ p.stock_quantity }}
+                                </td>
+                                <td class="p-2 border-start border-end bg-white">
+                                    <input type="number"
+                                        class="form-control text-center fw-bold border-0 bg-light focus-ring"
+                                        name="real_qty_{{ p.id }}" placeholder="{{ p.stock_quantity }}" min="0">
+                                </td>
+                                <td class="text-center small text-muted">{{ p.unit }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('searchBox').addEventListener('keyup', function () {
+        let searchText = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#opnameTable tbody tr');
+
+        rows.forEach(row => {
+            let name = row.querySelector('.item-name').innerText.toLowerCase();
+            let sku = row.querySelector('.item-sku').innerText.toLowerCase();
+
+            if (name.includes(searchText) || sku.includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<style>
+    .focus-ring:focus {
+        background-color: #fff !important;
+        box-shadow: inset 0 0 0 2px #0d6efd;
+    }
+</style>
+{% endblock %}

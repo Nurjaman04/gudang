@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <a href="{{ url_for('purchasing.view_po', id=po.id) }}"
+                class="text-decoration-none text-muted fw-bold d-inline-flex align-items-center mb-3 group-link">
+                <i class="bi bi-arrow-left me-2 transition-transform group-hover-translate-x"></i> Kembali ke Detail PO
+            </a>
+            <h2 class="fw-bold hero-title text-dark display-5">Buat Retur Pembelian</h2>
+            <p class="text-muted lead fs-6">Pengembalian barang untuk PO: <strong>{{ po.po_number }}</strong></p>
+        </div>
+    </div>
+
+    <form action="{{ url_for('purchasing.create_return', id=po.id) }}" method="POST">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg rounded-5 glass-panel position-relative overflow-hidden">
+                    <div class="position-absolute top-0 start-0 w-100"
+                        style="height: 6px; background: linear-gradient(90deg, #1c1c1c, #dc3545);"></div>
+
+                    <div class="card-body p-5">
+                        <div class="alert alert-warning border-0 rounded-4 shadow-sm mb-4">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <strong>Perhatian:</strong> Membuat retur akan mencatat pengembalian barang ke supplier.
+                            Pastikan komunikasi dengan supplier sudah dilakukan.
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-muted">ALASAN RETUR</label>
+                            <textarea class="form-control border-0 shadow-sm bg-light rounded-4 p-3" name="reason"
+                                rows="4" placeholder="Contoh: Barang cacat, Salah kirim, Expired..."
+                                required></textarea>
+                        </div>
+
+                        <div class="d-grid mt-5">
+                            <button type="submit"
+                                class="btn btn-danger rounded-pill py-3 fw-bold shadow-lg transform-hover">
+                                <i class="bi bi-arrow-return-left me-2"></i> Konfirmasi Retur
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .group-link:hover .group-hover-translate-x {
+        transform: translateX(-5px);
+    }
+
+    .transition-transform {
+        transition: transform 0.2s ease;
+    }
+
+    .transform-hover:hover {
+        transform: translateY(-2px);
+    }
+
+    .form-control:focus {
+        box-shadow: var(--shadow-soft);
+        border-color: #dc3545;
+    }
+</style>
+{% endblock %}

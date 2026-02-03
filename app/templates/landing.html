@@ -2,60 +2,95 @@
 
 {% block content %}
 {% if not session.get('user_id') %}
-<div class="text-center py-5 mb-5 rounded-4 text-white"
-    style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
-    <div class="container py-4">
-        <h1 class="display-4 fw-bold mb-3">Sistem Pergudangan Terpadu</h1>
-        <p class="lead mb-4 opacity-75">Kelola stok, pantau analitik, dan input barang masuk dalam satu sistem.</p>
-        <a href="{{ url_for('auth.login_web') }}" class="btn btn-light btn-lg text-primary fw-bold px-5 shadow-lg">Login
-            Staff / Admin</a>
+<div class="hero-premium rounded-4 mb-5 p-5 text-center position-relative overflow-hidden">
+    <div class="hero-overlay"></div>
+    <div class="container py-5 hero-content position-relative z-index-2">
+        <h1 class="display-3 fw-bold mb-3 text-gradient-gold hero-title">Arcapada Premium</h1>
+        <p class="lead mb-5 text-white opacity-90 fs-4 hero-subtitle">
+            The Ultimate Warehouse Management System
+        </p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ url_for('auth.login_web') }}"
+                class="btn btn-premium-gold btn-lg px-5 py-3 rounded-pill shadow-lg">
+                <i class="bi bi-box-arrow-in-right me-2"></i> Masuk Dashboard
+            </a>
+            <a href="#features" class="btn btn-glass-light btn-lg px-5 py-3 rounded-pill shadow-lg">
+                <i class="bi bi-info-circle me-2"></i> Pelajari Lebih Lanjut
+            </a>
+        </div>
     </div>
+    <!-- Decor Elements -->
+    <div class="hero-circle-1"></div>
+    <div class="hero-circle-2"></div>
 </div>
 
-<div class="row g-4" id="features">
+<div class="row g-4 mb-5" id="features">
     <div class="col-md-4">
-        <div class="card h-100 p-4 text-center border-0 shadow-sm">
-            <div class="mb-3"><i class="bi bi-box-seam text-primary" style="font-size: 3rem;"></i></div>
-            <h5 class="fw-bold">Stok Real-time</h5>
-            <p class="text-muted small">Cek ketersediaan barang kapan saja.</p>
+        <div class="card h-100 p-4 text-center border-0 shadow-sm rounded-4 glass-card hover-lift">
+            <div class="feature-icon-box mx-auto mb-4">
+                <i class="bi bi-box-seam text-gold fs-1"></i>
+            </div>
+            <h5 class="fw-bold text-dark mt-3">Monitoring Stok Presisi</h5>
+            <p class="text-muted small px-3">Pantau pergerakan stok Anda hingga satuan terkecil dengan akurasi 99.9%
+                secara real-time.</p>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card h-100 p-4 text-center border-0 shadow-sm">
-            <div class="mb-3"><i class="bi bi-truck text-success" style="font-size: 3rem;"></i></div>
-            <h5 class="fw-bold">Inbound Barang</h5>
-            <p class="text-muted small">Pencatatan barang masuk supplier.</p>
+        <div class="card h-100 p-4 text-center border-0 shadow-sm rounded-4 glass-card hover-lift">
+            <div class="feature-icon-box mx-auto mb-4">
+                <i class="bi bi-arrow-left-right text-gold fs-1"></i>
+            </div>
+            <h5 class="fw-bold text-dark mt-3">Inbound & Outbound</h5>
+            <p class="text-muted small px-3">Kelola barang masuk dan keluar dengan alur kerja yang efisien dan
+                terintegrasi otomatis.</p>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card h-100 p-4 text-center border-0 shadow-sm">
-            <div class="mb-3"><i class="bi bi-graph-up text-warning" style="font-size: 3rem;"></i></div>
-            <h5 class="fw-bold">Analitik Admin</h5>
-            <p class="text-muted small">Laporan penjualan untuk pemilik.</p>
+        <div class="card h-100 p-4 text-center border-0 shadow-sm rounded-4 glass-card hover-lift">
+            <div class="feature-icon-box mx-auto mb-4">
+                <i class="bi bi-graph-up-arrow text-gold fs-1"></i>
+            </div>
+            <h5 class="fw-bold text-dark mt-3">Analitik Cerdas</h5>
+            <p class="text-muted small px-3">Dapatkan wawasan bisnis mendalam melalui dashboard analitik yang
+                komprehensif dan intuitif.</p>
         </div>
     </div>
 </div>
 
 {% else %}
-<div class="container py-4">
-    <div class="text-center mb-5">
-        <h2 class="fw-bold">Halo, {{ session.get('username') }}! 👋</h2>
-        <p class="text-muted">Mau melakukan apa hari ini?</p>
-    </div>
-
-    <div class="row justify-content-center g-4">
+<div class="container-fluid py-2">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h2 class="fw-bold text-dark" style="font-family: 'Playfair Display', serif;">Halo, {{
+                session.get('username') }}! 👋</h2>
+            <p class="text-muted">Berikut adalah ringkasan aktivitas gudang Anda hari ini.</p>
+        </div>
+        <div>
+            <span class="badge bg-white text-dark border px-3 py-2 rounded-pill shadow-sm">
+                <i class="bi bi-calendar-check me-2 text-warning"></i> {% set now = additional_metadata_timestamp if
+                additional_metadata_timestamp else None %}{{ now }}
+            </span>
+        </div>
     </div>
 
     <!-- Multi-Branch Analytics Section -->
-    <div class="row mt-5">
+    <div class="row g-4">
         <!-- Chart 1: Multi-Branch Sales (Bar) -->
-        <div class="col-12 mb-4">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="card-header bg-white border-0 py-4 px-5">
-                    <h4 class="fw-bold text-dark mb-0"><i class="bi bi-buildings me-2 text-warning"></i>Performa
-                        Penjualan
-                        Cabang</h4>
-                    <small class="text-muted">Analitik real-time dari seluruh cabang Indonesia (Simulasi)</small>
+        <div class="col-12 col-xl-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 glass-panel">
+                <div
+                    class="card-header bg-transparent border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-buildings me-2 text-gold"></i>Performa Cabang
+                        </h5>
+                        <small class="text-muted">Total penjualan per cabang</small>
+                    </div>
+                    <div class="d-flex align-items-center bg-white border rounded-pill px-3 py-1 shadow-sm">
+                        <i class="bi bi-calendar-event me-2 text-muted"></i>
+                        <input type="date" id="branchDateFilter"
+                            class="form-control form-control-sm border-0 bg-transparent fw-bold text-secondary p-0"
+                            style="width: 130px; outline: none; box-shadow: none;">
+                    </div>
                 </div>
                 <div class="card-body p-4">
                     <div style="height: 350px; width: 100%;">
@@ -66,31 +101,37 @@
         </div>
 
         <!-- Chart 2: Top Products (Doughnut) -->
-        <div class="col-md-4 mb-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-header bg-white border-0 py-4 px-4">
-                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-pie-chart me-2 text-primary"></i>Produk Terlaris
-                    </h5>
-                    <small class="text-muted">Persentase TOP 5 Barang</small>
+        <div class="col-12 col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 glass-panel">
+                <div class="card-header bg-transparent border-0 py-4 px-4">
+                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-star me-2 text-gold"></i>Produk Unggulan</h5>
+                    <small class="text-muted">Top 5 produk dengan penjualan tertinggi</small>
                 </div>
-                <div class="card-body p-4 d-flex align-items-center justify-content-center">
-                    <div style="height: 250px; width: 100%;">
+                <div class="card-body p-4 d-flex align-items-center justify-content-center position-relative">
+                    <div style="height: 280px; width: 100%;">
                         <canvas id="topProductsChart"></canvas>
                     </div>
+                    <!-- Center Text Logic could go here -->
                 </div>
             </div>
         </div>
 
         <!-- Chart 3: Revenue Trend (Line) -->
-        <div class="col-md-8 mb-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-header bg-white border-0 py-4 px-4">
-                    <h5 class="fw-bold text-dark mb-0"><i class="bi bi-graph-up me-2 text-success"></i>Tren Pendapatan
-                    </h5>
-                    <small class="text-muted">Grafik penjualan 7 hari terakhir</small>
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 h-100 glass-panel">
+                <div
+                    class="card-header bg-transparent border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-graph-up me-2 text-success"></i>Tren
+                            Pendapatan</h5>
+                        <small class="text-muted">Grafik pergerakan omzet 7 hari terakhir</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-light text-dark border-0 rounded-circle shadow-sm">
+                        <i class="bi bi-three-dots-vertical"></i>
+                    </button>
                 </div>
                 <div class="card-body p-4">
-                    <div style="height: 250px; width: 100%;">
+                    <div style="height: 300px; width: 100%;">
                         <canvas id="revenueTrendChart"></canvas>
                     </div>
                 </div>
@@ -98,50 +139,71 @@
         </div>
     </div>
 
-    <div class="text-center mt-5">
-        <a href="{{ url_for('web.inventory') }}" class="text-decoration-none text-muted fw-bold">
-            <i class="bi bi-list-ul me-1"></i> Lihat Semua Stok Barang
+    <div class="text-center mt-5 mb-5 pb-5">
+        <a href="{{ url_for('web.inventory') }}" class="btn btn-premium-gold rounded-pill px-4 shadow py-2">
+            <i class="bi bi-box-seam me-2"></i> Kelola Stok Barang
         </a>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Set Current Date to Input
+            const todayDate = new Date();
+            const year = todayDate.getFullYear();
+            const month = String(todayDate.getMonth() + 1).padStart(2, '0');
+            const day = String(todayDate.getDate()).padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
+            document.getElementById('branchDateFilter').value = formattedDate;
+
+            // Common Chart Options
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            font: { family: "'Poppins', sans-serif", size: 12 },
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                }
+            };
+
             // --- 1. BRANCH CHART (Bar) ---
             const ctxBranch = document.getElementById('branchChart').getContext('2d');
             const branchNames = JSON.parse('{{ branches.names | tojson | safe }}');
             const branchSales = JSON.parse('{{ branches.sales | tojson | safe }}');
             const branchColors = JSON.parse('{{ branches.colors | tojson | safe }}');
 
+            // Add gradient to bars
+            const barGradients = branchSales.map(() => {
+                const grad = ctxBranch.createLinearGradient(0, 0, 0, 400);
+                grad.addColorStop(0, 'rgba(183, 134, 40, 0.8)');
+                grad.addColorStop(1, 'rgba(183, 134, 40, 0.2)');
+                return grad;
+            });
+
+
             new Chart(ctxBranch, {
                 type: 'bar',
                 data: {
                     labels: branchNames,
                     datasets: [{
-                        label: 'Total Penjualan (Rp)',
+                        label: 'Penjualan',
                         data: branchSales,
-                        backgroundColor: branchColors,
-                        borderRadius: 8,
-                        borderSkipped: false
+                        backgroundColor: branchColors.length ? branchColors : '#B78628',
+                        borderRadius: 6,
+                        barThickness: 30
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.raw);
-                                }
-                            }
-                        }
-                    },
+                    ...commonOptions,
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { borderDash: [5, 5] },
-                            ticks: { callback: function (value) { return 'Rp ' + (value / 1000000).toLocaleString('id-ID') + ' Jt'; } }
+                            grid: { color: 'rgba(0,0,0,0.05)', borderDash: [5, 5] },
+                            ticks: { callback: v => 'Rp ' + (v / 1000000).toLocaleString('id-ID') + ' Jt' }
                         },
                         x: { grid: { display: false } }
                     }
@@ -154,7 +216,6 @@
 
             const ctxTop = document.getElementById('topProductsChart').getContext('2d');
             if (!topNames || topNames.length === 0) {
-                // Placeholder logic if no data
                 new Chart(ctxTop, {
                     type: 'doughnut',
                     data: {
@@ -162,9 +223,8 @@
                         datasets: [{ data: [1], backgroundColor: ['#eee'], borderWidth: 0 }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { tooltip: { enabled: false }, legend: { display: false } }
+                        ...commonOptions,
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } }
                     }
                 });
             } else {
@@ -175,20 +235,20 @@
                         datasets: [{
                             data: topQtys,
                             backgroundColor: [
-                                '#c5a059', // Gold
-                                '#2c3e50', // Navy
-                                '#bdc3c7', // Silver
-                                '#e67e22', // Orange
-                                '#27ae60'  // Green
+                                '#B78628', '#D4AF37', '#2C3E50', '#8E44AD', '#27AE60'
                             ],
-                            borderWidth: 0
+                            borderWidth: 0,
+                            hoverOffset: 10
                         }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        ...commonOptions,
+                        cutout: '70%',
                         plugins: {
-                            legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } }
+                            legend: {
+                                position: 'bottom',
+                                labels: { boxWidth: 10, padding: 15 }
+                            }
                         }
                     }
                 });
@@ -200,54 +260,45 @@
 
             const ctxTrend = document.getElementById('revenueTrendChart').getContext('2d');
 
-            // Gradient Fill
             let gradient = ctxTrend.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(39, 174, 96, 0.2)'); // Light Green
-            gradient.addColorStop(1, 'rgba(39, 174, 96, 0)');
+            gradient.addColorStop(0, 'rgba(46, 125, 50, 0.2)');
+            gradient.addColorStop(1, 'rgba(46, 125, 50, 0.0)');
 
             new Chart(ctxTrend, {
                 type: 'line',
                 data: {
                     labels: trendDates,
                     datasets: [{
-                        label: 'Pendapatan',
+                        label: 'Pendapatan Harian',
                         data: trendValues,
-                        borderColor: '#27ae60',
+                        borderColor: '#2E7D32',
                         backgroundColor: gradient,
-                        borderWidth: 2,
+                        borderWidth: 3,
                         pointBackgroundColor: '#fff',
-                        pointBorderColor: '#27ae60',
-                        pointRadius: 4,
+                        pointBorderColor: '#2E7D32',
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
                         fill: true,
                         tension: 0.4
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    ...commonOptions,
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { callback: function (v) { return 'Rp ' + new Intl.NumberFormat('id-ID').format(v); } }
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { callback: v => 'Rp ' + new Intl.NumberFormat('id-ID').format(v) }
                         },
                         x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
                     }
                 }
             });
         });
     </script>
 </div>
-
-<style>
-    .hover-card {
-        transition: transform 0.3s ease;
-    }
-
-    .hover-card:hover {
-        transform: translateY(-10px);
-    }
-</style>
 {% endif %}
-
 {% endblock %}

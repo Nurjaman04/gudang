@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <div>
+            <h2 class="fw-bold text-success"><i class="bi bi-graph-up"></i> Rekap Penjualan</h2>
+            <p class="text-muted">Analisis penjualan per produk.</p>
+        </div>
+        <div>
+            <a href="{{ url_for('web.export_rekap_excel', start_date=start_date, end_date=end_date) }}"
+                class="btn btn-success me-2">
+                <i class="bi bi-file-earmark-excel"></i> Export Excel
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-dark">
+                <i class="bi bi-printer"></i> Cetak PDF
+            </button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 rounded-4 mb-4 no-print">
+        <div class="card-body p-4">
+            <form action="{{ url_for('web.laporan_rekap') }}" method="GET" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small text-muted">DARI TANGGAL</label>
+                    <input type="date" class="form-control" name="start_date" value="{{ start_date }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small text-muted">SAMPAI TANGGAL</label>
+                    <input type="date" class="form-control" name="end_date" value="{{ end_date }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-success w-100 fw-bold">
+                        <i class="bi bi-filter"></i> Filter Rekap
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rekap Penjualan Section -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-white p-4 border-bottom">
+            <h5 class="mb-0 fw-bold text-dark">Rincian Penjualan per Produk</h5>
+            <small class="text-muted">Diurutkan berdasarkan pendapatan tertinggi</small>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4 py-3">Nama Produk</th>
+                            <th class="text-center py-3">Total Terjual (Qty)</th>
+                            <th class="text-end pe-4 py-3">Total Pendapatan (Rp)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in sales_summary %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-dark">{{ s.name }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">{{ s.qty
+                                    }}</span>
+                            </td>
+                            <td class="text-end pe-4 fw-bold text-success">
+                                Rp {{ "{:,.0f}".format(s.total) }}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center py-5 text-muted">
+                                <i class="bi bi-cart-x fs-1 d-block mb-3"></i>
+                                Belum ada penjualan pada periode ini.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="bg-light">
+                        <tr>
+                            <td class="ps-4 fw-bold">TOTAL KESELURUHAN</td>
+                            <td class="text-center fw-bold">{{ sales_summary|sum(attribute='qty') }}</td>
+                            <td class="text-end pe-4 fw-bold text-dark">
+                                Rp {{ "{:,.0f}".format(sales_summary|sum(attribute='total')) }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            background-color: white;
+        }
+    }
+</style>
+{% endblock %}

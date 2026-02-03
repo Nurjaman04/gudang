@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center">
+            <a href="{{ url_for('crm.customer_list') }}" class="btn btn-outline-secondary rounded-circle me-3">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="fw-bold text-dark mb-0">{{ customer.name }}</h2>
+                <div class="text-muted small">
+                    <span class="badge bg-primary me-2">{{ customer.type }}</span>
+                    Bergabung sejak {{ customer.joined_at.strftime('%d %b %Y') }}
+                </div>
+            </div>
+        </div>
+        <div class="text-end">
+            <h5 class="text-muted small mb-0 fw-bold">TOTAL SPEND</h5>
+            <h3 class="fw-bold text-success mb-0">Rp {{ "{:,.0f}".format(total_spend) }}</h3>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Profile & Actions -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-muted mb-3">KONTAK</h6>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Email</small>
+                        <span class="fw-bold">{{ customer.email or '-' }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Telepon / WhatsApp</small>
+                        <span class="fw-bold">{{ customer.phone or '-' }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Alamat</small>
+                        <span>{{ customer.address or '-' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-warning text-dark fw-bold py-3">
+                    <i class="bi bi-pencil-square me-2"></i> Catat Interaksi Baru
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ url_for('crm.add_interaction') }}" method="POST">
+                        <input type="hidden" name="customer_id" value="{{ customer.id }}">
+
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted">Tipe</label>
+                            <select class="form-select" name="type">
+                                <option value="Call">Call (Telepon)</option>
+                                <option value="Visit">Visit (Kunjungan)</option>
+                                <option value="Whatsapp">WhatsApp / Chat</option>
+                                <option value="Email">Email</option>
+                                <option value="Meeting">Meeting</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted">Catatan Hasil</label>
+                            <textarea class="form-control" name="notes" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted">Jadwal Follow-up (Opsional)</label>
+                            <input type="date" class="form-control" name="follow_up_date">
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100 rounded-pill fw-bold">Simpan Interaksi</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tabs -->
+        <div class="col-md-8">
+            <ul class="nav nav-pills mb-3 gap-2" id="pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill fw-bold" id="pills-trx-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-trx" type="button" role="tab">Riwayat Transaksi</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill fw-bold" id="pills-log-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-log" type="button" role="tab">Log Interaksi (CRM)</button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="pills-tabContent">
+                <!-- Transactions -->
+                <div class="tab-pane fade show active" id="pills-trx" role="tabpanel">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="card-body p-0">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4 py-3">Tanggal</th>
+                                        <th>Ref</th>
+                                        <th>Item</th>
+                                        <th class="text-end pe-4">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for t in transactions %}
+                                    {% if t.transaction_type == 'OUT' %}
+                                    <tr>
+                                        <td class="ps-4">{{ t.created_at.strftime('%d %b %Y') }}</td>
+                                        <td><span class="badge bg-light text-dark border">{{ t.reference }}</span></td>
+                                        <td>{{ t.product.name }} <span class="text-muted">x{{ t.quantity }}</span></td>
+                                        <td class="text-end pe-4 fw-bold text-success">Rp {{
+                                            "{:,.0f}".format(t.total_amount) }}</td>
+                                    </tr>
+                                    {% endif %}
+                                    {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4 text-muted">Belum ada transaksi
+                                            penjualan.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactions Log -->
+                <div class="tab-pane fade" id="pills-log" role="tabpanel">
+                    <div class="timeline">
+                        {% for i in interactions %}
+                        <div class="timeline-item d-flex mb-3">
+                            <div class="me-3 d-flex flex-column align-items-center" style="width: 50px;">
+                                <div class="rounded-circle bg-white border p-2 mb-1">
+                                    {% if i.type == 'Call' %}<i class="bi bi-telephone text-primary"></i>
+                                    {% elif i.type == 'Whatsapp' %}<i class="bi bi-whatsapp text-success"></i>
+                                    {% elif i.type == 'Visit' %}<i class="bi bi-geo-alt text-danger"></i>
+                                    {% else %}<i class="bi bi-chat-left-text text-secondary"></i>{% endif %}
+                                </div>
+                                <div class="h-100 border-start" style="border-style: dashed !important;"></div>
+                            </div>
+                            <div
+                                class="card border-0 shadow-sm w-100 p-3 rounded-4 mb-2 {{ 'bg-warning bg-opacity-10' if i.status == 'Open' and i.follow_up_date else 'bg-white' }}">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="badge bg-light text-dark border">{{ i.type }}</span>
+                                    <small class="text-muted">{{ i.date.strftime('%d %b %Y, %H:%M') }}</small>
+                                </div>
+                                <p class="mb-2 text-dark">{{ i.notes }}</p>
+
+                                {% if i.follow_up_date %}
+                                <div
+                                    class="d-flex align-items-center justify-content-between mt-2 pt-2 border-top border-dark-subtle">
+                                    <small class="fw-bold {{ 'text-danger' if i.status == 'Open' else 'text-muted' }}">
+                                        <i class="bi bi-calendar-event me-1"></i> Follow-up: {{
+                                        i.follow_up_date.strftime('%d %b %Y') }}
+                                    </small>
+                                    {% if i.status == 'Open' %}
+                                    <a href="{{ url_for('crm.complete_interaction', id=i.id) }}"
+                                        class="btn btn-sm btn-success rounded-pill px-3">
+                                        <i class="bi bi-check-lg me-1"></i> Selesai
+                                    </a>
+                                    {% else %}
+                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>
+                                        Selesai</span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5 text-muted">Belum ada riwayat interaksi.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

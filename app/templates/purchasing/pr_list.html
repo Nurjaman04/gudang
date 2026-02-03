@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h2 class="fw-bold hero-title text-dark display-5">Purchase Request</h2>
+            <p class="text-muted lead fs-6">Permintaan pengadaan barang internal.</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ url_for('purchasing.create_pr') }}"
+                class="btn btn-premium-gold rounded-pill px-4 py-2 shadow-sm">
+                <i class="bi bi-plus-lg me-2"></i> Buat PR Baru
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-5 glass-panel overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light bg-opacity-50 text-uppercase text-muted small">
+                        <tr>
+                            <th class="ps-4 py-3 border-0">No. PR</th>
+                            <th class="py-3 border-0">Tanggal</th>
+                            <th class="py-3 border-0">Status</th>
+                            <th class="py-3 border-0">Catatan</th>
+                            <th class="py-3 border-0 text-end pe-4">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        {% for pr in prs %}
+                        <tr>
+                            <td class="ps-4 fw-bold text-dark">{{ pr.pr_number }}</td>
+                            <td class="text-muted">{{ pr.date.strftime('%d %b %Y') }}</td>
+                            <td>
+                                {% if pr.status == 'Pending' %}
+                                <span
+                                    class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3">Pending</span>
+                                {% elif pr.status == 'Approved' %}
+                                <span
+                                    class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3">Approved</span>
+                                {% else %}
+                                <span
+                                    class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3">{{
+                                    pr.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted small">{{ pr.notes or '-' }}</td>
+                            <td class="text-end pe-4">
+                                <a href="{{ url_for('purchasing.view_pr', id=pr.id) }}"
+                                    class="btn btn-sm btn-light rounded-circle shadow-sm">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">Belum ada Purchase Request.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

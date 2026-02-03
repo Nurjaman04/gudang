@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6">
+            <h2 class="fw-bold hero-title text-dark display-5">Procurement</h2>
+            <p class="text-muted lead fs-6">Pusat pengelolaan pembelian dan pengadaan barang.</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <div class="d-inline-flex gap-2">
+                <a href="{{ url_for('purchasing.create_po') }}"
+                    class="btn btn-premium-gold rounded-pill px-4 py-2 shadow-sm d-flex align-items-center">
+                    <i class="bi bi-plus-lg me-2"></i> Buat PO Baru
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards (Glass) -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm glass-card h-100 rounded-4 p-3 d-flex flex-row align-items-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                    <i class="bi bi-send fs-4 text-primary"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted small text-uppercase mb-1 fw-bold">PO Menunggu</h6>
+                    <h3 class="fw-bold mb-0 text-dark">{{ pending_pos }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm glass-card h-100 rounded-4 p-3 d-flex flex-row align-items-center">
+                <div class="rounded-circle bg-info bg-opacity-10 p-3 me-3">
+                    <i class="bi bi-file-earmark-text fs-4 text-info"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted small text-uppercase mb-1 fw-bold">Purchase Req</h6>
+                    <h3 class="fw-bold mb-0 text-dark">-</h3>
+                    <small class="text-muted" style="font-size: 10px;">Coming Soon</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm glass-panel h-100 rounded-4 p-4 position-relative overflow-hidden"
+                style="background: linear-gradient(135deg, #1c1c1c 0%, #2c3e50 100%);">
+                <!-- Decor -->
+                <i class="bi bi-cart4 position-absolute top-50 end-0 translate-middle-y me-4 text-white opacity-10"
+                    style="font-size: 5rem;"></i>
+
+                <h5 class="text-white fw-bold mb-1">Aksi Cepat</h5>
+                <div class="d-flex gap-3 mt-3">
+                    <a href="{{ url_for('purchasing.supplier_list') }}"
+                        class="btn btn-outline-light rounded-pill btn-sm px-3">
+                        <i class="bi bi-people me-1"></i> Data Supplier
+                    </a>
+                    <a href="{{ url_for('web.inventory') }}" class="btn btn-outline-light rounded-pill btn-sm px-3">
+                        <i class="bi bi-box-seam me-1"></i> Cek Stok
+                    </a>
+                    <a href="{{ url_for('web.receiving_page') }}"
+                        class="btn btn-outline-light rounded-pill btn-sm px-3">
+                        <i class="bi bi-truck me-1"></i> Penerimaan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content: PO History -->
+    <div class="card border-0 shadow-lg rounded-5 glass-panel overflow-hidden">
+        <div class="card-header bg-white bg-opacity-50 border-0 p-4 d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history me-2 text-gold"></i>Riwayat Purchase
+                    Order</h5>
+                <small class="text-muted">Daftar pemesanan barang ke supplier</small>
+            </div>
+            <!-- Filter placeholder -->
+            <div class="dropdown">
+                <button class="btn btn-light btn-sm rounded-pill shadow-sm dropdown-toggle px-3" type="button"
+                    data-bs-toggle="dropdown">
+                    Status: Semua
+                </button>
+                <ul class="dropdown-menu border-0 shadow">
+                    <li><a class="dropdown-item" href="#">Semua</a></li>
+                    <li><a class="dropdown-item" href="#">Draft</a></li>
+                    <li><a class="dropdown-item" href="#">Sent</a></li>
+                    <li><a class="dropdown-item" href="#">Received</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light bg-opacity-50 text-uppercase text-muted small">
+                        <tr>
+                            <th class="ps-4 py-3 border-0 rounded-start-pill">No. PO</th>
+                            <th class="py-3 border-0">Supplier</th>
+                            <th class="py-3 border-0">Tanggal</th>
+                            <th class="py-3 border-0 text-center">Status</th>
+                            <th class="py-3 border-0 text-end">Total</th>
+                            <th class="py-3 border-0 text-end pe-4 rounded-end-pill">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                        {% for po in pos %}
+                        <tr>
+                            <td class="ps-4 border-bottom-0">
+                                <div class="fw-bold text-dark">{{ po.po_number }}</div>
+                            </td>
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="rounded-circle bg-secondary bg-opacity-10 p-2 me-2 d-flex align-items-center justify-content-center"
+                                        style="width: 32px; height: 32px;">
+                                        <i class="bi bi-building small text-secondary"></i>
+                                    </div>
+                                    {{ po.supplier.name }}
+                                </div>
+                            </td>
+                            <td class="text-muted border-bottom-0">{{ po.date.strftime('%d %b %Y') }}</td>
+                            <td class="text-center border-bottom-0">
+                                {% if po.status == 'Draft' %}
+                                <span
+                                    class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3">Draft</span>
+                                {% elif po.status == 'Sent' %}
+                                <span
+                                    class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3">Sent</span>
+                                {% elif po.status == 'Received' %}
+                                <span
+                                    class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3">Received</span>
+                                {% else %}
+                                <span class="badge bg-light text-dark border rounded-pill px-3">{{ po.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-bold text-dark border-bottom-0">Rp {{
+                                "{:,.0f}".format(po.total_amount) }}</td>
+                            <td class="text-end pe-4 border-bottom-0">
+                                <a href="{{ url_for('purchasing.view_po', id=po.id) }}"
+                                    class="btn btn-sm btn-light rounded-circle shadow-sm" data-bs-toggle="tooltip"
+                                    title="Lihat Detail">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="opacity-25 mb-3">
+                                    <i class="bi bi-inbox fs-1"></i>
+                                </div>
+                                <p class="text-muted mb-0">Belum ada Purchase Order yang dibuat.</p>
+                                <a href="{{ url_for('purchasing.create_po') }}"
+                                    class="btn btn-link text-gold text-decoration-none fw-bold mt-2">Buat PO Pertama</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+    }
+
+    .text-gold {
+        color: #b78628 !important;
+    }
+</style>
+{% endblock %}

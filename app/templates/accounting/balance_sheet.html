@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark"><i class="bi bi-file-earmark-bar-graph me-2"></i>Neraca Keuangan</h2>
+            <p class="text-muted">Balance Sheet per {{ now_str }}</p>
+        </div>
+        <a href="{{ url_for('accounting.dashboard') }}" class="btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Kembali
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Assets -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-primary text-white py-3 rounded-top-4">
+                    <h5 class="mb-0 fw-bold">ASET (Assets)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <tbody>
+                            {% for acc in assets %}
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-bold text-dark">{{ acc.code }}</span> {{ acc.name }}
+                                </td>
+                                <td class="text-end pe-4 fw-bold text-dark">
+                                    Rp {{ "{:,.0f}".format(acc.balance) }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="bg-light">
+                            <tr>
+                                <th class="ps-4 py-3">TOTAL ASET</th>
+                                <th class="text-end pe-4 py-3 text-primary">Rp {{ "{:,.0f}".format(total_assets) }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liab & Equity -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-danger text-white py-3 rounded-top-4">
+                    <h5 class="mb-0 fw-bold">KEWAJIBAN (Liabilities)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <tbody>
+                            {% for acc in liabilities %}
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-bold text-dark">{{ acc.code }}</span> {{ acc.name }}
+                                </td>
+                                <td class="text-end pe-4 fw-bold text-dark">
+                                    Rp {{ "{:,.0f}".format(acc.balance) }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center py-3 text-muted">Tidak ada kewajiban.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-info text-white py-3 rounded-top-4">
+                    <h5 class="mb-0 fw-bold">EKUITAS (Equity)</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <tbody>
+                            {% for acc in equity %}
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="fw-bold text-dark">{{ acc.code }}</span> {{ acc.name }}
+                                </td>
+                                <td class="text-end pe-4 fw-bold text-dark">
+                                    Rp {{ "{:,.0f}".format(acc.balance) }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+
+                            <!-- Current Earnings Line -->
+                            <tr class="table-active">
+                                <td class="ps-4">
+                                    <span class="fw-bold text-dark">3200</span> Laba Periode Berjalan
+                                </td>
+                                <td
+                                    class="text-end pe-4 fw-bold {{ 'text-success' if current_earnings >= 0 else 'text-danger' }}">
+                                    Rp {{ "{:,.0f}".format(current_earnings) }}
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="bg-light">
+                            <tr>
+                                <th class="ps-4 py-3">TOTAL KEWAJIBAN & EKUITAS</th>
+                                <th class="text-end pe-4 py-3 text-info">Rp {{ "{:,.0f}".format(total_le) }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

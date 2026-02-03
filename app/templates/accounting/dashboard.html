@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark"><i class="bi bi-wallet2 me-2 text-success"></i>Accounting Dashboard</h2>
+            <p class="text-muted">Ringkasan kesehatan keuangan perusahaan.</p>
+        </div>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-primary text-white"
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body p-4 position-relative overflow-hidden">
+                    <h6 class="text-upper fw-bold text-white-50">Total Aset</h6>
+                    <h2 class="fw-bold mb-0">Rp {{ "{:,.0f}".format(total_assets) }}</h2>
+                    <i class="bi bi-bank position-absolute"
+                        style="right: 20px; bottom: 20px; font-size: 3rem; opacity: 0.2"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-success text-white"
+                style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <div class="card-body p-4 position-relative overflow-hidden">
+                    <h6 class="text-upper fw-bold text-white-50">Laba Bersih (YTD)</h6>
+                    <h2 class="fw-bold mb-0">Rp {{ "{:,.0f}".format(net_profit) }}</h2>
+                    <i class="bi bi-graph-up-arrow position-absolute"
+                        style="right: 20px; bottom: 20px; font-size: 3rem; opacity: 0.2"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold text-dark mb-3">Menu Laporan</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('accounting.balance_sheet') }}"
+                            class="btn btn-outline-primary rounded-pill text-start fw-bold">
+                            <i class="bi bi-file-earmark-bar-graph me-2"></i> Neraca (Balance Sheet)
+                        </a>
+                        <a href="{{ url_for('accounting.profit_loss') }}"
+                            class="btn btn-outline-success rounded-pill text-start fw-bold">
+                            <i class="bi bi-pie-chart me-2"></i> Laba Rugi (P&L)
+                        </a>
+                        <a href="{{ url_for('accounting.journal_entries') }}"
+                            class="btn btn-outline-secondary rounded-pill text-start fw-bold">
+                            <i class="bi bi-journal-text me-2"></i> Jurnal Umum
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Journals -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-white p-3 border-bottom d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Jurnal Terakhir</h5>
+            <a href="{{ url_for('accounting.journal_entries') }}" class="btn btn-sm btn-light rounded-pill">Lihat
+                Semua</a>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Tanggal</th>
+                        <th>No. Ref</th>
+                        <th>Keterangan</th>
+                        <th class="text-end pe-4">Total (Est)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for je in recent_journals %}
+                    <tr>
+                        <td class="ps-4 text-muted small">{{ je.date.strftime('%d %b %Y') }}</td>
+                        <td class="fw-bold text-primary small">{{ je.reference }}</td>
+                        <td>{{ je.description }}</td>
+                        <td class="text-end pe-4 text-muted small">
+                            {# Sum Debit Just for Display #}
+                            Rp {{ "{:,.0f}".format(je.items | sum(attribute='debit')) }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">Belum ada jurnal transaksi.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
