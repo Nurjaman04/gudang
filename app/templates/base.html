@@ -85,6 +85,17 @@
             </li>
             {% endif %}
 
+            {% if session.role in ['admin', 'manager'] or 'purchasing' in session.features %}
+            <li class="menu-category">Procurement</li>
+            <li>
+                <a href="{{ url_for('purchasing.index') }}"
+                    class="menu-link {% if 'purchasing' in request.endpoint %}active{% endif %}">
+                    <i class="bi bi-bag-check"></i>
+                    <span>Pembelian (PO)</span>
+                </a>
+            </li>
+            {% endif %}
+
             {% if session.role in ['admin', 'manager'] or 'inventory' in session.features or 'warehouse' in
             session.features %}
             <li class="menu-category">Warehouse</li>

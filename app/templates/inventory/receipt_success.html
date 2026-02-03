@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container pb-5 d-print-none">
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <div class="mb-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+            </div>
+            <h2 class="fw-bold mb-3">Penerimaan Berhasil!</h2>
+            <p class="text-muted mb-5">Data stok dan batch telah diperbarui.</p>
+
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('web.receiving_page') }}" class="btn btn-light rounded-pill px-4 border">
+                    <i class="bi bi-arrow-left me-2"></i> Input Lagi
+                </a>
+                <button onclick="window.print()" class="btn btn-premium-gold rounded-pill px-5 shadow-lg fw-bold">
+                    <i class="bi bi-printer me-2"></i> Cetak Bukti (Print)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PRINT LAYOUT (Visible on Print Only) -->
+<div class="print-layout d-none d-print-block">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold mb-0">ARCAPADA</h1>
+        <p class="small text-muted mb-0">Sistem Manajemen Gudang</p>
+        <hr class="my-3 border-dark">
+        <h3 class="fw-bold">BUKTI PENERIMAAN BARANG</h3>
+        <p class="text-muted">Goods Receipt Note</p>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-6">
+            <table class="table table-sm table-borderless">
+                {% set first_trx = transactions[0] %}
+                <tr>
+                    <td class="text-muted" style="width: 120px;">No. Transaksi</td>
+                    <td class="fw-bold">: {% if transactions|length > 1 %}GRP-{{ ref if ref else first_trx.id }}{% else
+                        %}RCV-{{ first_trx.id }}{% endif %}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Tanggal</td>
+                    <td class="fw-bold">: {{ first_trx.created_at.strftime('%d %B %Y %H:%M') }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Referensi</td>
+                    <td class="fw-bold">: {{ ref if ref else (first_trx.reference or '-') }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted">Penerima</td>
+                    <td class="fw-bold">: {{ session.get('username') }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-6 text-end">
+            <h6 class="fw-bold text-uppercase text-muted small">SUPPLIER:</h6>
+            <h5 class="fw-bold">{{ supplier_name or first_trx.supplier }}</h5>
+
+            {% if print_address %}
+            <div class="mt-4 text-start bg-light p-3 rounded border">
+                <h6 class="fw-bold text-uppercase text-muted small mb-1">ALAMAT TUJUAN / CATATAN:</h6>
+                <p class="mb-0 fw-bold" style="white-space: pre-wrap;">{{ print_address }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card border rounded-0 mb-5">
+        <table class="table table-bordered mb-0">
+            <thead class="bg-light">
+                <tr class="text-center text-uppercase small fw-bold">
+                    <th style="width: 50px;">No</th>
+                    <th>Nama Barang / Deskripsi</th>
+                    <th>SKU</th>
+                    <th style="width: 150px;">Qty Diterima</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trx in transactions %}
+                <tr>
+                    <td class="text-center">{{ loop.index }}</td>
+                    <td>
+                        <span class="fw-bold d-block">{{ trx.product.name }}</span>
+                        {% if trx.product.description %}
+                        <small class="text-muted">{{ trx.product.description }}</small>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ trx.product.sku }}</td>
+                    <td class="text-center fw-bold fs-5">{{ trx.quantity }} {{ trx.product.unit or 'Pcs' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-4 text-center">
+            <p class="mb-5 pb-3">Diterima Oleh,</p>
+            <div class="border-bottom border-dark w-75 mx-auto"></div>
+            <p class="mt-2 fw-bold">Gudang</p>
+        </div>
+        <div class="col-4 text-center">
+            <p class="mb-5 pb-3">Diperiksa Oleh,</p>
+            <div class="border-bottom border-dark w-75 mx-auto"></div>
+            <p class="mt-2 fw-bold">Spv. Logistik</p>
+        </div>
+        <div class="col-4 text-center">
+            <p class="mb-5 pb-3">Pengirim,</p>
+            <div class="border-bottom border-dark w-75 mx-auto"></div>
+            <p class="mt-2 fw-bold">{{ supplier_name or first_trx.supplier }}</p>
+        </div>
+    </div>
+
+    <div class="text-center mt-5 fixed-bottom position-absolute bottom-0 w-100">
+        <small class="text-muted fst-italic">Dicetak pada: {{ now.strftime('%d/%m/%Y %H:%M:%S') }} oleh System
+            Arcapada</small>
+    </div>
+</div>
+
+<style>
+    @media print {
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        body {
+            background: white !important;
+            font-family: 'Times New Roman', serif;
+        }
+
+        .print-layout {
+            display: block !important;
+        }
+
+        .d-print-none {
+            display: none !important;
+        }
+
+        footer,
+        header,
+        .sidebar {
+            display: none !important;
+        }
+
+        .container-fluid {
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+    }
+
+    .btn-premium-gold {
+        background: linear-gradient(135deg, #b78628 0%, #d4af37 100%);
+        color: white;
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}

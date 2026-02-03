@@ -19,7 +19,7 @@
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-lg-8">
+        <div class="col-lg-10"> <!-- Widened to accommodate table -->
             <div class="card border-0 shadow-lg rounded-5 glass-panel position-relative overflow-hidden">
                 <!-- Decor Header Line -->
                 <div class="position-absolute top-0 start-0 w-100"
@@ -41,7 +41,11 @@
                         </div>
                         <!-- PO Items Result -->
                         <div id="poItemsResult" class="mt-3" style="display: none;">
-                            <div class="table-responsive rounded-3 bg-white shadow-sm p-2">
+                            <div class="alert alert-info border-0 shadow-sm mb-0">
+                                <small><i class="bi bi-info-circle me-1"></i>Klik tombol <b>Pilih</b> di bawah untuk
+                                    menambahkan item ke daftar terima.</small>
+                            </div>
+                            <div class="table-responsive rounded-3 bg-white shadow-sm mt-2">
                                 <table class="table table-hover mb-0 small">
                                     <thead class="bg-light">
                                         <tr>
@@ -59,7 +63,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ url_for('inventory.receiving_process') }}" method="POST">
+                    <form action="{{ url_for('inventory.receiving_process') }}" method="POST" id="receiveForm">
                         <div class="row">
                             <div class="col-12 mb-4">
                                 <h5 class="fw-bold text-dark border-bottom pb-3 mb-4"><i
@@ -84,6 +88,15 @@
                                         Supplier</label>
                                 </div>
                             </div>
+                            <div class="col-12">
+                                <div class="form-floating text-dark">
+                                    <textarea class="form-control rounded-4 border-0 bg-light shadow-inner"
+                                        name="print_address" placeholder="Alamat Cetak"
+                                        style="height: 100px;"></textarea>
+                                    <label class="text-muted fw-bold"><i class="bi bi-geo-alt me-1"></i> Alamat Cetak /
+                                        Catatan (Opsional)</label>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row mt-5">
@@ -93,65 +106,68 @@
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-muted ms-1 mb-2">PILIH PRODUK</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-0 rounded-start-4 ps-3 shadow-sm"><i
-                                        class="bi bi-search text-gold"></i></span>
-                                <select class="form-select border-0 shadow-sm py-3 pe-5 bg-white rounded-end-4"
-                                    id="productSelect" name="product_id" style="min-height: 58px;" required>
-                                    <option value="" disabled selected>-- Cari Kode SKU / Nama Barang --</option>
-                                    {% for p in products %}
-                                    <option value="{{ p.id }}">{{ p.sku }} - {{ p.name }} (Stok: {{ p.stock_quantity }})
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small text-muted ms-1 mb-2">MODAL PER SATUAN
-                                    (OPSIONAL)</label>
-                                <div class="input-group shadow-sm rounded-4 overflow-hidden">
-                                    <span class="input-group-text bg-white border-0 fw-bold text-gold px-3">Rp</span>
-                                    <input type="number" class="form-control border-0 py-3" id="costInput" name="cost"
-                                        placeholder="0" min="0" step="100">
+                        <!-- Manual Add Item Box -->
+                        <div class="bg-light bg-opacity-50 p-4 rounded-4 mb-4 border border-light shadow-sm">
+                            <h6 class="text-muted text-uppercase fw-bold small mb-3">Tambah Item Manual</h6>
+                            <div class="row g-3 items-end">
+                                <div class="col-md-5">
+                                    <label class="form-label small text-muted">Produk</label>
+                                    <select class="form-select border-0 shadow-sm" id="productSelect">
+                                        <option value="">-- Pilih Produk --</option>
+                                        {% for p in products %}
+                                        <option value="{{ p.id }}" data-sku="{{ p.sku }}" data-name="{{ p.name }}"
+                                            data-cost="{{ p.cost }}">{{ p.sku }} - {{ p.name }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
-                                <div class="form-text small ms-2 mt-1"><i class="bi bi-info-circle me-1"></i>Biarkan
-                                    kosong untuk gunakan harga master data</div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small text-muted ms-1 mb-2">EXPIRY DATE</label>
-                                <div class="input-group shadow-sm rounded-4 overflow-hidden">
-                                    <span class="input-group-text bg-white border-0 px-3"><i
-                                            class="bi bi-calendar text-gold"></i></span>
-                                    <input type="date" class="form-control border-0 py-3" name="expiry_date">
+                                <div class="col-md-2">
+                                    <label class="form-label small text-muted">Jumlah</label>
+                                    <input type="number" class="form-control border-0 shadow-sm" id="qtyInput" value="1"
+                                        min="1">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted">Cost (Opt)</label>
+                                    <input type="number" class="form-control border-0 shadow-sm" id="costInput"
+                                        placeholder="Auto">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small text-muted d-block">&nbsp;</label>
+                                    <button type="button" class="btn btn-dark w-100 shadow-sm"
+                                        onclick="addManualItem()">
+                                        <i class="bi bi-plus-lg"></i> Tambah
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-5">
-                            <label class="form-label fw-bold small text-muted ms-1 mb-2">JUMLAH MASUK (QTY)</label>
-                            <div
-                                class="input-group shadow-lg rounded-pill overflow-hidden border border-2 border-light">
-                                <button class="btn btn-light px-4 border-0" type="button"
-                                    onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
-                                    <i class="bi bi-dash-lg"></i>
-                                </button>
-                                <input type="number"
-                                    class="form-control border-0 text-center fw-bold fs-4 text-success bg-white"
-                                    id="qtyInput" name="quantity" value="1" min="1" required>
-                                <button class="btn btn-light px-4 border-0" type="button"
-                                    onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
-                                    <i class="bi bi-plus-lg"></i>
-                                </button>
-                            </div>
+                        <!-- Received Items Table -->
+                        <div class="table-responsive rounded-4 bg-white shadow-sm overflow-hidden mb-4">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light small text-muted text-uppercase">
+                                    <tr>
+                                        <th class="ps-4 py-3">Produk</th>
+                                        <th class="py-3 text-center">Jumlah</th>
+                                        <th class="py-3 text-end">Cost</th>
+                                        <th class="py-3 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="receivedItemsBody">
+                                    <tr id="emptyStateRow">
+                                        <td colspan="4" class="text-center py-5 text-muted">
+                                            <i class="bi bi-box-seam fs-1 d-block mb-2 opacity-25"></i>
+                                            Belum ada item ditambahkan.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
+
+                        <input type="hidden" name="items_json" id="itemsJson">
 
                         <div class="d-grid mt-5">
                             <button type="submit"
-                                class="btn btn-premium-gold rounded-pill py-3 fw-bold shadow-lg transform-hover">
+                                class="btn btn-premium-gold rounded-pill py-3 fw-bold shadow-lg transform-hover"
+                                onclick="submitForm(event)">
                                 <i class="bi bi-check-circle-fill me-2"></i> Konfirmasi Penerimaan Barang
                             </button>
                         </div>
@@ -184,8 +200,8 @@
         transform: translateY(-2px);
     }
 
-    /* Enhance Select Dropdown */
-    .form-select:focus {
+    .form-select:focus,
+    .form-control:focus {
         box-shadow: var(--shadow-soft);
         border-color: #b78628;
     }
@@ -200,62 +216,40 @@
 </style>
 
 <script>
+    let receivedItems = [];
+
     async function searchPO() {
         const poNumber = document.getElementById('poSearchInput').value;
-        if (!poNumber) {
-            alert('Silakan masukkan nomor PO');
-            return;
-        }
+        if (!poNumber) return alert('Silakan masukkan nomor PO');
 
         try {
             const response = await fetch(`/inventory/api/get_po_details?po_number=${encodeURIComponent(poNumber)}`);
             const data = await response.json();
 
             if (data.success) {
-                // Fill Supplier
                 document.getElementById('supplier').value = data.supplier;
-                document.getElementById('ref').value = poNumber; // Set Reference default
+                document.getElementById('ref').value = poNumber;
 
-                // Populate Items
                 const tableBody = document.getElementById('poItemsTableBody');
                 tableBody.innerHTML = '';
 
+                if (data.items.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Semua item di PO ini sudah diterima penuh.</td></tr>';
+                }
+
                 data.items.forEach(item => {
                     const row = document.createElement('tr');
-
-                    // Use a more robust way to pass object data. We encode it to base64 or just use data attributes?
-                    // Simple JSON stringify in onclick works if no quotes.
-                    // Safer: bind click listener dynamically or store in global map.
-                    // For now, simpler: data-attributes.
-
                     row.innerHTML = `
                         <td><div class="fw-bold">${item.name}</div><small class="text-muted">${item.sku}</small></td>
                         <td>${item.ordered_qty}</td>
                         <td class="text-primary fw-bold">${item.remaining_qty}</td>
-                        <td><button type="button" class="btn btn-sm btn-outline-primary select-po-item-btn" 
-                            data-product-id="${item.product_id}" 
-                            data-qty="${item.remaining_qty}" 
-                            data-cost="${item.unit_cost}">Pilih</button></td>
+                        <td><button type="button" class="btn btn-sm btn-outline-primary" 
+                            onclick="addItemFromPO('${item.product_id}', '${item.name}', '${item.sku}', ${item.remaining_qty}, ${item.unit_cost})">
+                            Pilih
+                        </button></td>
                     `;
                     tableBody.appendChild(row);
                 });
-
-                // Add listeners
-                document.querySelectorAll('.select-po-item-btn').forEach(btn => {
-                    btn.addEventListener('click', function () {
-                        const pid = this.getAttribute('data-product-id');
-                        const qty = this.getAttribute('data-qty');
-                        const cost = this.getAttribute('data-cost');
-
-                        document.getElementById('productSelect').value = pid;
-                        document.getElementById('qtyInput').value = qty;
-                        if (cost && cost !== 'null') document.getElementById('costInput').value = cost;
-
-                        // Focus
-                        document.getElementById('productSelect').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    });
-                });
-
                 document.getElementById('poItemsResult').style.display = 'block';
             } else {
                 alert(data.message || 'PO tidak ditemukan');
@@ -264,6 +258,102 @@
             console.error('Error:', error);
             alert('Terjadi kesalahan saat mengambil data PO');
         }
+    }
+
+    function addManualItem() {
+        const select = document.getElementById('productSelect');
+        const pId = select.value;
+        const qty = parseInt(document.getElementById('qtyInput').value);
+        const costVal = document.getElementById('costInput').value;
+
+        if (!pId) return alert('Pilih produk dulu!');
+        if (qty < 1) return alert('Jumlah minimal 1');
+
+        const option = select.options[select.selectedIndex];
+        // Use manual cost or fallback to data-cost
+        const cost = costVal ? parseFloat(costVal) : parseFloat(option.getAttribute('data-cost') || 0);
+
+        addItem(pId, option.getAttribute('data-name'), option.getAttribute('data-sku'), qty, cost);
+
+        // Reset manual inputs
+        select.value = "";
+        document.getElementById('qtyInput').value = 1;
+        document.getElementById('costInput').value = "";
+    }
+
+    function addItemFromPO(id, name, sku, qty, cost) {
+        addItem(id, name, sku, qty, cost);
+        // Maybe visual feedback or disable button?
+    }
+
+    function addItem(id, name, sku, qty, cost) {
+        // Check if exists
+        const existing = receivedItems.find(i => i.product_id == id);
+        if (existing) {
+            existing.quantity += qty;
+            // Optionally update cost logic? Keep old cost or average? For now assume same.
+        } else {
+            receivedItems.push({
+                product_id: id,
+                name: name,
+                sku: sku,
+                quantity: qty,
+                cost: cost
+            });
+        }
+        renderTable();
+    }
+
+    function removeItem(index) {
+        receivedItems.splice(index, 1);
+        renderTable();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('receivedItemsBody');
+        tbody.innerHTML = '';
+
+        if (receivedItems.length === 0) {
+            tbody.innerHTML = `<tr id="emptyStateRow"><td colspan="4" class="text-center py-5 text-muted"><i class="bi bi-box-seam fs-1 d-block mb-2 opacity-25"></i>Belum ada item ditambahkan.</td></tr>`;
+            return;
+        }
+
+        receivedItems.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="ps-4">
+                    <div class="fw-bold text-dark">${item.name}</div>
+                    <small class="text-muted">${item.sku}</small>
+                </td>
+                <td class="text-center">
+                    <div class="input-group input-group-sm justify-content-center" style="width: 120px; margin: 0 auto;">
+                        <input type="number" class="form-control text-center" value="${item.quantity}" min="1" 
+                            onchange="updateItemQty(${index}, this.value)">
+                    </div>
+                </td>
+                <td class="text-end font-monospace">Rp ${item.cost ? item.cost.toLocaleString() : '-'}</td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-light text-danger rounded-circle" onclick="removeItem(${index})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function updateItemQty(index, val) {
+        if (val < 1) return;
+        receivedItems[index].quantity = parseInt(val);
+    }
+
+    function submitForm(e) {
+        if (receivedItems.length === 0) {
+            e.preventDefault();
+            alert('Mohon tambahkan minimal satu barang!');
+            return;
+        }
+        document.getElementById('itemsJson').value = JSON.stringify(receivedItems);
     }
 </script>
 {% endblock %}

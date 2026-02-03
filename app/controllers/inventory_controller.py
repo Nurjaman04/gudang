@@ -113,54 +113,66 @@ def receiving_process():
         return redirect(url_for('web.index'))
 
     try:
-        p_id = request.form['product_id']
-        qty = int(request.form['quantity'])
+        import json
+        items_json = request.form.get('items_json')
         supplier = request.form['supplier']
         ref = request.form['reference']
+        print_address = request.form.get('print_address')
         
         # New Inputs for Smart Inventory
-        cost = float(request.form.get('cost', 0))
-        expiry_str = request.form.get('expiry_date')
+        expiry_str = request.form.get('expiry_date') # Shared expiry for now, or per item if extended
         expiry_date = None
         if expiry_str:
              from datetime import datetime
              expiry_date = datetime.strptime(expiry_str, '%Y-%m-%d').date()
+
+        if not items_json:
+            raise ValueError("Tidak ada item yang diterima")
+
+        items = json.loads(items_json)
         
-        product = Product.query.get_or_404(p_id)
+        # Group ID for Printing (Optional, using Reference is easier)
         
-        # --- SMART INVENTORY ENGINE ---
         from app.services.inventory_engine import SmartInventoryEngine
-        
-        # 1. Update Stock & Create Batch
-        # Engine automatically adds a Batch record
-        SmartInventoryEngine.process_inbound(
-            product_id=product.id,
-            quantity=qty,
-            cost_price=cost if cost > 0 else product.cost, # Use default cost if not provided
-            expiry_date=expiry_date,
-            auto_commit=False # We commit later
-        )
-        
-        # Update Master Stock Quantity (Denormalization for fast read)
-        product.stock_quantity += qty
-        
-        # 2. Record Transaction
-        trx = Transaction(
-            product_id=product.id,
-            transaction_type='IN',
-            quantity=qty,
-            total_amount=0, 
-            supplier=supplier,    
-            reference=ref         
-        )
-        
-        db.session.add(trx)
-        db.session.add(trx)
-        def record_accounting_purchase():
+        from app.services.accounting_service import AccountingService
+
+        created_trxs = []
+
+        for item in items:
+            p_id = item['product_id']
+            qty = int(item['quantity'])
+            cost = float(item.get('cost', 0)) # Item specific cost
+            
+            product = Product.query.get(p_id)
+            if not product: continue
+
+            # 1. Update Stock & Create Batch
+            SmartInventoryEngine.process_inbound(
+                product_id=product.id,
+                quantity=qty,
+                cost_price=cost if cost > 0 else product.cost,
+                expiry_date=expiry_date,
+                auto_commit=False 
+            )
+            
+            # Update Master Stock
+            product.stock_quantity += qty
+            
+            # 2. Record Transaction
+            trx = Transaction(
+                product_id=product.id,
+                transaction_type='IN',
+                quantity=qty,
+                total_amount=0, 
+                supplier=supplier,    
+                reference=ref         
+            )
+            db.session.add(trx)
+            db.session.flush() # Get ID
+            created_trxs.append(trx)
+
+            # 3. Accounting
             try:
-                 from app.services.accounting_service import AccountingService
-                 # Record Purchase: Inventory (Dr) / Cash (Cr)
-                 # Assume cost provided is total or unit? Logic in process_inbound uses unit cost.
                  total_purchase_cost = (cost if cost > 0 else product.cost) * qty
                  AccountingService.record_purchase(
                      reference=ref or f"RCV-{trx.id}",
@@ -170,17 +182,52 @@ def receiving_process():
             except Exception as e:
                  print(f"Accounting Error (Purchase): {e}")
 
-        record_accounting_purchase()
+        # Save print address
+        if print_address:
+            session['last_print_address'] = print_address
+            session[f'print_addr_ref_{ref}'] = print_address # Key by Reference
+
         db.session.commit()
         
-        flash(f'Penerimaan {product.name} ({qty} pcs) dari {supplier} berhasil disimpan dengan Batch baru.', 'success')
-        return redirect(url_for('web.inventory'))
+        flash(f'Penerimaan {len(items)} item barang berhasil. Silakan cetak bukti.', 'success')
+        return redirect(url_for('inventory.receiving_success_by_ref', ref=ref))
         
     except Exception as e:
         db.session.rollback()
+
         flash(f'Gagal: {str(e)}', 'danger')
         return redirect(url_for('web.receiving_page'))
-    return redirect(url_for('web.inventory')) 
+
+@inventory_bp.route('/receiving/success/<int:id>')
+def receiving_success(id):
+    if 'user_id' not in session: return redirect(url_for('auth.login_web'))
+    
+    # Legacy Support or Single Item view
+    trx = Transaction.query.get_or_404(id)
+    print_address = session.get(f'print_addr_{id}') or session.get('last_print_address')
+    
+    # Pass as list
+    return render_template('inventory/receipt_success.html', transactions=[trx], print_address=print_address, now=datetime.now())
+
+@inventory_bp.route('/receiving/success/ref/<path:ref>')
+def receiving_success_by_ref(ref):
+    if 'user_id' not in session: return redirect(url_for('auth.login_web'))
+    
+    # Fetch latest transactions with this reference
+    # Limit to reasonable number to avoid fetching old history if ref reused
+    transactions = Transaction.query.filter_by(reference=ref, transaction_type='IN').order_by(Transaction.id.desc()).limit(50).all()
+    
+    if not transactions:
+        flash('Data transaksi tidak ditemukan untuk dicetak.', 'warning')
+        return redirect(url_for('web.inventory'))
+        
+    print_address = session.get(f'print_addr_ref_{ref}') or session.get('last_print_address')
+    
+    # Determine Supplier from first trx
+    supplier_name = transactions[0].supplier if transactions else '-'
+    
+    return render_template('inventory/receipt_success.html', transactions=transactions, print_address=print_address, now=datetime.now(), ref=ref, supplier_name=supplier_name)
+
 
 @inventory_bp.route('/api/get_request_details', methods=['GET'])
 def get_request_details():
